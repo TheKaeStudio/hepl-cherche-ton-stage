@@ -1,21 +1,23 @@
 .layout {
     display: flex;
-    width: 100%;
+    min-width: 100%;
     min-height: 100dvh;
+    padding: 12px;
 }
 
 // ─── Brand panel ──────────────────────────────────────────────────────────────
 .brand {
     width: 380px;
-    min-width: 380px;
-    background: linear-gradient(145deg, #111214 0%, #1c1e26 100%);
+    min-width: 45%;
+    background: #ebebeb;
     display: flex;
     flex-direction: column;
     padding: 40px;
     position: sticky;
     top: 0;
     align-self: flex-start;
-    height: 100dvh;
+    height: 100%;
+    border-radius: 48px;
 }
 
 .logo {
