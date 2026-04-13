@@ -1,0 +1,49 @@
+.companyCard {
+    display: flex;
+    flex-direction: column;
+    border-radius: 1rem;
+    padding: 1rem;
+    border: 2px solid #e5e5e5;
+    width: 100%;
+    gap: 24px;
+
+    & ul {
+        display: flex;
+        gap: 8px;
+    }
+
+    & .companyInfos {
+        display: flex;
+        gap: 20px;
+
+        & h3 {
+            color: var(--text-h);
+        }
+
+        & > div {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        & img {
+            width: 64px;
+            height: 64px;
+            border: 1px solid #e5e5e5;
+            border-radius: 100%;
+        }
+    }
+
+    & .companyActions {
+        display: flex;
+        justify-content: space-between;
+        gap: 24px;
+
+        & .iconLabelList {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 24px;
+        }
+    }
+}

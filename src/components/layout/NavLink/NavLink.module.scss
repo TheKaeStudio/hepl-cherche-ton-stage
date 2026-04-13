@@ -1,0 +1,29 @@
+.link {
+    display: flex;
+    gap: 16px;
+    padding: 12px 16px;
+    text-decoration: none;
+    color: #202020;
+    align-items: center;
+    background: rgb(255, 255, 255);
+    border-radius: 12px;
+    transition: background .1s ease;
+
+    &:hover {
+        background: #f9e8e8;
+    }
+
+    &.active {
+        background: #f8efef;
+    }
+
+    & svg {
+        font-size: 24px;
+    }
+
+    & p {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-h);
+    }
+}
