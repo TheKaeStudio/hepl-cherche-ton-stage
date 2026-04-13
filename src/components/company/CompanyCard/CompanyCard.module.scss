@@ -1,22 +1,28 @@
 .companyCard {
     display: flex;
     flex-direction: column;
-    border-radius: 1rem;
-    padding: 1rem;
-    border: 2px solid #e5e5e5;
+    border-radius: 16px;
+    padding: 20px;
+    border: 2px solid var(--border);
     width: 100%;
-    gap: 24px;
+    gap: 20px;
+    background: var(--bg);
 
-    & ul {
+    & > ul {
         display: flex;
+        flex-wrap: wrap;
         gap: 8px;
+        list-style: none;
     }
 
     & .companyInfos {
         display: flex;
-        gap: 20px;
+        gap: 16px;
+        align-items: flex-start;
 
         & h3 {
+            font-size: 18px;
+            font-weight: 700;
             color: var(--text-h);
         }
 
@@ -24,26 +30,87 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
+            min-width: 0;
         }
 
         & img {
-            width: 64px;
-            height: 64px;
-            border: 1px solid #e5e5e5;
+            width: 60px;
+            height: 60px;
+            border: 1px solid var(--border);
             border-radius: 100%;
+            flex-shrink: 0;
+            object-fit: contain;
+        }
+    }
+
+    & .logoPlaceholder {
+        width: 60px;
+        height: 60px;
+        border: 1px solid var(--border);
+        border-radius: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        background: var(--accent-bg);
+
+        svg {
+            font-size: 28px !important;
+            color: var(--border);
         }
     }
 
     & .companyActions {
         display: flex;
+        align-items: flex-end;
         justify-content: space-between;
-        gap: 24px;
+        flex-wrap: wrap;
+        gap: 12px;
+        padding-top: 16px;
+        border-top: 2px solid var(--border);
 
         & .iconLabelList {
             display: flex;
-            align-items: flex-end;
-            justify-content: space-between;
-            gap: 24px;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px 20px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        & .cardButtons {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+            margin-left: auto;
+        }
+
+        & .saveBtn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: 1.5px solid var(--border);
+            background: transparent;
+            color: var(--text);
+            cursor: pointer;
+            transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+
+            svg { font-size: 20px !important; }
+
+            &:hover {
+                background: var(--accent-bg);
+                color: var(--text-h);
+            }
+
+            &.saveBtnActive {
+                background: var(--accent-bg);
+                color: var(--accent);
+                border-color: var(--accent-border);
+            }
         }
     }
 }

@@ -1,0 +1,81 @@
+.header {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.name {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text-h);
+}
+
+.province {
+    font-size: 14px;
+    color: var(--text);
+    font-weight: 500;
+}
+
+.description {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.6;
+}
+
+.yes {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #22c55e;
+    svg { font-size: 16px !important; }
+}
+
+.no {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #ef4444;
+    svg { font-size: 16px !important; }
+}
+
+.contactSection {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sectionLabel {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+}
+
+.contactName {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-h);
+    padding: 0 12px;
+}
+
+.contactLink {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-h);
+    text-decoration: none;
+    padding: 10px 12px;
+    border-radius: 10px;
+    transition: background 0.15s;
+
+    svg { font-size: 18px !important; color: var(--accent); }
+
+    &:hover { background: var(--accent-bg); }
+}

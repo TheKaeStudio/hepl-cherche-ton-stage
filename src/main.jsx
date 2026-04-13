@@ -4,10 +4,13 @@ import { RouterProvider } from 'react-router-dom'
 import '@fontsource-variable/manrope'
 import './index.scss'
 
+import { ThemeProvider } from './contexts/ThemeContext'
 import router from './router.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <ThemeProvider>
+      <RouterProvider router={router} />
+    </ThemeProvider>
   </StrictMode>,
 )

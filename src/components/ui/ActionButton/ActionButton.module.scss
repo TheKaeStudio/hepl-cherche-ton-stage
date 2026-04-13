@@ -1,22 +1,35 @@
 .actionButton {
     display: flex;
-    padding: 10px 10px 10px 10px;
+    padding: 10px;
     border-radius: 16px;
-    border: 2px solid #E5E5E5;
+    border: 2px solid var(--border);
+    background: transparent;
     width: fit-content;
     height: fit-content;
     align-items: center;
     gap: 8px;
     cursor: pointer;
+    transition: background 0.15s, opacity 0.15s;
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+
+    &:hover {
+        background: var(--accent-bg);
+    }
 
     & svg {
-        color: #202020;
+        color: var(--text-h);
         width: 24px;
         height: 24px;
+        flex-shrink: 0;
     }
 
     & p {
-        color: #202020;
+        color: var(--text-h);
+        font-size: 16px;
+        font-weight: 600;
     }
 
     &.containsText {
@@ -32,15 +45,25 @@
     }
 
     &.filled {
-        background: #202020;
-        border-color: #202020;
+        background: var(--accent);
+        border-color: var(--accent);
 
         & svg {
-            color: #ffffff;
+            color: var(--bg);
         }
 
         & p {
-            color: #ffffff;
+            color: var(--bg);
         }
+
+        &:hover {
+            opacity: 0.85;
+        }
+    }
+
+    &.disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        pointer-events: none;
     }
 }

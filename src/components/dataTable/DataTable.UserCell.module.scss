@@ -1,0 +1,77 @@
+.cell {
+    cursor: default;
+    font-weight: 500;
+}
+
+.card {
+    position: fixed;
+    z-index: 200;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    width: 260px;
+    box-shadow: var(--shadow);
+    pointer-events: none;
+}
+
+.cardHeader {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.avatarIcon {
+    font-size: 48px !important;
+    color: var(--border);
+    flex-shrink: 0;
+}
+
+.name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-h);
+}
+
+.role {
+    font-size: 13px;
+    color: var(--text);
+    margin-top: 2px;
+}
+
+.email {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text);
+
+    svg {
+        flex-shrink: 0;
+        width: 16px;
+        height: 16px;
+    }
+}
+
+.stageRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+
+    span {
+        font-size: 13px;
+        color: var(--text);
+    }
+}

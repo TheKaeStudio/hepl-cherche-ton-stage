@@ -1,0 +1,62 @@
+.card {
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    padding: 24px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    background: var(--bg);
+}
+
+.top {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    h3 {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--text-h);
+    }
+}
+
+.footer {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-top: 20px;
+    border-top: 2px solid var(--border);
+}
+
+.contacts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px 24px;
+    flex: 1;
+    min-width: 0;
+}
+
+.contactBtn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    text-decoration: none;
+    transition: color 0.15s;
+    white-space: nowrap;
+
+    svg { font-size: 18px !important; }
+
+    &:hover {
+        color: var(--text-h);
+    }
+}
+
+.learnMore {
+    flex-shrink: 0;
+    margin-left: auto;
+}

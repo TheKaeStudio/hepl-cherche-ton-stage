@@ -1,0 +1,61 @@
+.body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+    padding: 8px 0;
+}
+
+.iconWrap {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: #fef2f2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    svg {
+        font-size: 28px !important;
+        color: #ef4444;
+    }
+}
+
+.message {
+    font-size: 15px;
+    color: var(--text);
+    line-height: 1.5;
+}
+
+.footer {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+}
+
+.cancelBtn,
+.deleteBtn {
+    flex: 1;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: var(--sans);
+    transition: opacity 0.15s;
+
+    &:hover { opacity: 0.85; }
+}
+
+.cancelBtn {
+    background: var(--bg);
+    border: 2px solid var(--border);
+    color: var(--text-h);
+}
+
+.deleteBtn {
+    background: #ef4444;
+    border: 2px solid #ef4444;
+    color: #fff;
+}

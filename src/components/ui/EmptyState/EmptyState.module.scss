@@ -1,0 +1,38 @@
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 64px 32px;
+    text-align: center;
+}
+
+.iconWrapper {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background: var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+
+    svg { font-size: 28px !important; }
+}
+
+.title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-h);
+}
+
+.description {
+    font-size: 14px;
+    color: var(--text);
+    max-width: 320px;
+}
+
+.action {
+    margin-top: 4px;
+}

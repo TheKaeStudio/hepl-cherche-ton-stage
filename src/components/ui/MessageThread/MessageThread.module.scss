@@ -1,0 +1,87 @@
+.thread {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.message {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+
+    &.mine {
+        flex-direction: row-reverse;
+
+        .bubbleWrap {
+            align-items: flex-end;
+        }
+
+        .bubble {
+            background: var(--accent);
+            border-radius: 16px 16px 4px 16px;
+
+            p {
+                color: var(--bg);
+            }
+        }
+    }
+
+    &.theirs {
+        .bubble {
+            background: var(--accent-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px 16px 16px 4px;
+
+            p {
+                color: var(--text-h);
+            }
+        }
+    }
+}
+
+.avatar {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatarIcon {
+    font-size: 32px !important;
+    color: var(--border);
+}
+
+.bubbleWrap {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-width: 80%;
+}
+
+.sender {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0 4px;
+}
+
+.bubble {
+    padding: 10px 14px;
+
+    p {
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 1.5;
+    }
+}
+
+.time {
+    font-size: 11px;
+    color: var(--text);
+    font-weight: 500;
+    padding: 0 4px;
+}

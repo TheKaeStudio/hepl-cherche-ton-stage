@@ -8,9 +8,13 @@ export default function Toolbar({
 }) {
     return (
         <div className={styles.toolbar}>
-            {searchBar}
+            {searchBar && (
+                <div className={styles.searchWrap}>
+                    {searchBar}
+                </div>
+            )}
             {(sortButton || filterButton || createButton) && (
-                <div>
+                <div className={styles.actions}>
                     {sortButton}
                     {filterButton}
                     {createButton}

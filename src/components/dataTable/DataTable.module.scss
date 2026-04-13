@@ -1,0 +1,36 @@
+.wrapper {
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    width: 100%;
+}
+
+// Inner scroll container — séparé du wrapper pour ne pas clipper
+// les éléments position:fixed (ex: profile card)
+.scroll {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--bg);
+
+    td,
+    th {
+        padding: 14px 18px;
+        text-align: left;
+        font-size: 16px;
+        font-weight: 500;
+        color: var(--text-h);
+        white-space: nowrap;
+    }
+
+    tbody tr {
+        border-top: 2px solid var(--border);
+
+        &:hover {
+            background: var(--accent-bg);
+        }
+    }
+}

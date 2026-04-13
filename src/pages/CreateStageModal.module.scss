@@ -1,0 +1,93 @@
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+
+    @media (max-width: 560px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.fieldGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.groupLabel {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+}
+
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.chip {
+    padding: 8px 18px;
+    border-radius: 999px;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    color: var(--text-h);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+
+    &:hover {
+        background: var(--accent-bg);
+    }
+
+    &.chipActive {
+        background: var(--accent);
+        color: var(--bg);
+        border-color: var(--accent);
+    }
+}
+
+.error {
+    font-size: 13px;
+    color: #ef4444;
+    font-weight: 500;
+}
+
+.footer {
+    display: flex;
+    gap: 10px;
+}
+
+.cancelBtn,
+.saveBtn {
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: var(--sans);
+    transition: opacity 0.15s;
+
+    &:hover { opacity: 0.85; }
+}
+
+.cancelBtn {
+    background: var(--bg);
+    border: 2px solid var(--border);
+    color: var(--text-h);
+}
+
+.saveBtn {
+    background: var(--accent);
+    border: 2px solid var(--accent);
+    color: var(--bg);
+}

@@ -1,0 +1,104 @@
+.layout {
+    display: flex;
+    width: 100%;
+    min-height: 100dvh;
+}
+
+// ─── Brand panel ──────────────────────────────────────────────────────────────
+.brand {
+    width: 380px;
+    min-width: 380px;
+    background: linear-gradient(145deg, #111214 0%, #1c1e26 100%);
+    display: flex;
+    flex-direction: column;
+    padding: 40px;
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    height: 100dvh;
+}
+
+.logo {
+    width: 44px;
+    filter: brightness(0) invert(1);
+}
+
+.brandContent {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 20px;
+}
+
+.title {
+    font-size: 28px;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.2;
+}
+
+.subtitle {
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.65);
+    font-weight: 500;
+    line-height: 1.6;
+}
+
+// ─── Form panel ───────────────────────────────────────────────────────────────
+.form {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    overflow-y: auto;
+}
+
+.formInner {
+    width: 100%;
+    max-width: 400px;
+}
+
+// ─── Responsive ───────────────────────────────────────────────────────────────
+@media (max-width: 680px) {
+    .layout {
+        flex-direction: column;
+    }
+
+    .brand {
+        width: 100%;
+        min-width: 0;
+        height: auto;
+        min-height: unset;
+        position: relative;
+        padding: 28px 24px;
+        flex-direction: row;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .logo {
+        width: 36px;
+        flex-shrink: 0;
+    }
+
+    .brandContent {
+        flex: 1;
+        justify-content: flex-start;
+        gap: 4px;
+    }
+
+    .title {
+        font-size: 18px;
+    }
+
+    .subtitle {
+        display: none;
+    }
+
+    .form {
+        padding: 28px 20px;
+        align-items: flex-start;
+    }
+}

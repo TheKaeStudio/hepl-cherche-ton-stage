@@ -1,0 +1,105 @@
+.groups {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.groupLabel {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+// ─── Pill chips ───────────────────────────────────────────────────────────────
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 16px;
+    border-radius: 100px;
+    border: 2px solid var(--border);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, color 0.15s;
+    user-select: none;
+    line-height: 1;
+    font-family: var(--sans);
+
+    input[type="checkbox"] {
+        display: none;
+    }
+
+    &:hover {
+        border-color: var(--text-h);
+        color: var(--text-h);
+        background: var(--accent-bg);
+    }
+}
+
+.chipActive {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+
+    &:hover {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: var(--bg);
+        opacity: 0.85;
+    }
+}
+
+// ─── Footer buttons ───────────────────────────────────────────────────────────
+.footer {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    width: 100%;
+}
+
+.resetBtn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--sans);
+    background: var(--bg);
+    border: 2px solid var(--border);
+    color: var(--text-h);
+    transition: opacity 0.15s;
+
+    &:hover { opacity: 0.75; }
+}
+
+.applyBtn {
+    flex: 2;
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: var(--sans);
+    background: var(--accent);
+    border: 2px solid var(--accent);
+    color: var(--bg);
+    transition: opacity 0.15s;
+
+    &:hover { opacity: 0.85; }
+}

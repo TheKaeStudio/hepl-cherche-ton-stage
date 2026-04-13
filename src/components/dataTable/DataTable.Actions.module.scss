@@ -1,0 +1,41 @@
+.cell {
+    text-align: right;
+}
+
+.actions {
+    display: flex;
+    gap: 2px;
+    justify-content: flex-end;
+}
+
+.btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text);
+    padding: 6px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, color 0.15s;
+
+    svg {
+        font-size: 18px !important;
+    }
+
+    &:hover {
+        background: var(--border);
+        color: var(--text-h);
+    }
+
+    &.delete:hover {
+        background: #fef2f2;
+        color: #ef4444;
+    }
+
+    &.bookmark:hover {
+        background: #eff6ff;
+        color: #3b82f6;
+    }
+}

@@ -1,0 +1,129 @@
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+.statCard {
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--bg);
+}
+
+.statIcon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    svg {
+        font-size: 24px !important;
+    }
+}
+
+.statValue {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--text-h);
+    line-height: 1;
+    margin-bottom: 2px;
+}
+
+.statLabel {
+    font-size: 13px;
+    color: var(--text);
+    font-weight: 500;
+}
+
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sectionTitle {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+}
+
+.stageList {
+    display: flex;
+    flex-direction: column;
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.stageRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 2px solid var(--border);
+    background: var(--bg);
+
+    &:last-child {
+        border-bottom: none;
+    }
+
+    ul {
+        list-style: none;
+        display: flex;
+    }
+}
+
+.stageInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.stageName {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-h);
+}
+
+.stageCompany {
+    font-size: 13px;
+    color: var(--text);
+    font-weight: 500;
+}
+
+.notifList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    padding: 16px 20px;
+    background: var(--bg);
+}
+
+.notifItem {
+    font-size: 14px;
+    color: var(--text-h);
+    font-weight: 500;
+}
+
+@media screen and (max-width: 1200px) {
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .statCard {
+        padding: 16px;
+    }
+}

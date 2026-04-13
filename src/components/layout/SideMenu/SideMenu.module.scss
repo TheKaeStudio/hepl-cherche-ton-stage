@@ -1,19 +1,35 @@
 .sideMenu {
     display: flex;
     flex-direction: column;
-    min-width: 300px;
+    width: 280px;
+    min-width: 280px;
+    background: var(--bg);
+    transition: width 0.25s ease, min-width 0.25s ease;
+    overflow: hidden;
+    flex-shrink: 0;
+
+    &.collapsed {
+        width: 68px;
+        min-width: 68px;
+    }
 
     &Header {
         display: flex;
-        padding: 12px 20px;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px;
+        gap: 8px;
+        flex-shrink: 0;
     }
 }
 
 nav {
     display: flex;
     flex-direction: column;
-    padding: 12px;
+    padding: 0 12px 12px;
     gap: 12px;
+    flex: 1;
+    overflow: hidden;
 
     & > div {
         display: flex;
@@ -23,19 +39,130 @@ nav {
         & > div {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 4px;
         }
-    }
-
-    & footer {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        padding-top: 12px;
-        border-top: 2px solid #F1F1F1;
     }
 }
 
 .HEPLLogo {
-    width: 48px;
+    width: 44px;
+    flex-shrink: 0;
+}
+
+.sectionLabel {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    padding: 8px 12px 2px;
+    opacity: 0.6;
+    overflow: hidden;
+    white-space: nowrap;
+    max-height: 28px;
+    transition: opacity 0.2s ease, max-height 0.2s ease, padding 0.2s ease;
+
+    .collapsed & {
+        opacity: 0;
+        max-height: 0;
+        padding: 0;
+    }
+}
+
+// ─── Collapse button (desktop only) ──────────────────────────────────────────
+.collapseBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 2px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s, color 0.15s;
+
+    &:hover {
+        background: var(--accent-bg);
+        color: var(--text-h);
+    }
+
+    & svg { font-size: 18px !important; }
+}
+
+// ─── Close button (mobile only) ──────────────────────────────────────────────
+.closeBtn {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 2px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s, color 0.15s;
+
+    &:hover {
+        background: var(--accent-bg);
+        color: var(--text-h);
+    }
+
+    & svg { font-size: 18px !important; }
+}
+
+// ─── Mobile overlay backdrop ──────────────────────────────────────────────────
+.overlay {
+    display: none;
+}
+
+// ─── Responsive ───────────────────────────────────────────────────────────────
+@media (max-width: 900px) {
+    .sideMenu {
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100dvh;
+        z-index: 200;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        box-shadow: var(--shadow);
+        width: 280px;
+        min-width: 280px;
+
+        &.mobileOpen {
+            transform: translateX(0);
+        }
+
+        // On mobile, never show collapsed state
+        &.collapsed {
+            width: 280px;
+            min-width: 280px;
+        }
+
+        &Header {
+            padding: 12px;
+        }
+    }
+
+    .collapseBtn {
+        display: none;
+    }
+
+    .closeBtn {
+        display: flex;
+    }
+
+    .overlay {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 199;
+        background: rgba(0, 0, 0, 0.4);
+    }
 }

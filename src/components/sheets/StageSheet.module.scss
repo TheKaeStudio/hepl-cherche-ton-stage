@@ -1,0 +1,55 @@
+.titleSection {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    ul {
+        list-style: none;
+        display: flex;
+        gap: 8px;
+    }
+}
+
+.title {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text-h);
+    line-height: 1.2;
+}
+
+.contactSection {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sectionLabel {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+}
+
+.contactLink {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-h);
+    text-decoration: none;
+    padding: 10px 12px;
+    border-radius: 10px;
+    transition: background 0.15s;
+
+    svg { font-size: 18px !important; color: var(--accent); }
+
+    &:hover { background: var(--accent-bg); }
+}
+
+.messagesSection {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}

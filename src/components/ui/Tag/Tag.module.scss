@@ -8,7 +8,7 @@ li {
     width: fit-content;
     border: 1px solid #ffffff00;
     color: var(--text);
-    background: #f5f5f5;
+    background: var(--accent-bg);
 
     & svg {
         font-size: 16px !important;
