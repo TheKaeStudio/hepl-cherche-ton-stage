@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { stages } from "@/data/mock";
+import { useState, useMemo, useEffect } from "react";
+import { getInternships, deleteInternship } from "@/api/internships";
 import SearchBar from "@/components/ui/SearchBar/SearchBar";
 import ActionButton from "@/components/ui/ActionButton/ActionButton";
 import Toolbar from "@/components/layout/Toolbar/Toolbar";
@@ -19,9 +19,11 @@ const FILTER_CONFIG = [
         key: "status",
         label: "Statut",
         options: [
-            { value: "en-cours", label: "En cours" },
-            { value: "termine", label: "Terminé" },
-            { value: "non-rempli", label: "Non rempli" },
+            { value: "assigned",    label: "Assigné"    },
+            { value: "in_progress", label: "En cours"   },
+            { value: "submitted",   label: "Soumis"     },
+            { value: "validated",   label: "Validé"     },
+            { value: "rejected",    label: "Rejeté"     },
         ],
     },
     {
@@ -29,12 +31,16 @@ const FILTER_CONFIG = [
         label: "Groupe",
         options: [
             { value: "D301", label: "D301" },
+            { value: "D302", label: "D302" },
+            { value: "D201", label: "D201" },
             { value: "D202", label: "D202" },
         ],
     },
 ];
 
 export default function Stages() {
+    const [stages, setStages] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [selectedStage, setSelectedStage] = useState(null);
     const [deleteTarget, setDeleteTarget] = useState(null);
     const [showCreate, setShowCreate] = useState(false);
@@ -42,6 +48,23 @@ export default function Stages() {
     const [sortDir, setSortDir] = useState("asc");
     const [showFilter, setShowFilter] = useState(false);
     const [filters, setFilters] = useState({});
+
+    useEffect(() => {
+        getInternships()
+            .then(setStages)
+            .finally(() => setLoading(false));
+    }, []);
+
+    async function handleCreate(newStage) {
+        setStages((prev) => [newStage, ...prev]);
+    }
+
+    async function handleDelete() {
+        if (!deleteTarget) return;
+        await deleteInternship(deleteTarget.id);
+        setStages((prev) => prev.filter((s) => s.id !== deleteTarget.id));
+        setDeleteTarget(null);
+    }
 
     function handleSort(key) {
         if (sortKey === key) {
@@ -101,7 +124,7 @@ export default function Stages() {
                             Filtres{activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}
                         </ActionButton>
                     }
-                    createButton={<ActionButton icon={PlusIcon} filled>Ajouter un stage</ActionButton>}
+                    createButton={<ActionButton icon={PlusIcon} filled onClick={() => setShowCreate(true)}>Ajouter un stage</ActionButton>}
                 />
                 <DataTable>
                     <DataTable.Header sortKey={sortKey} sortDir={sortDir} onSort={handleSort}>
@@ -115,26 +138,23 @@ export default function Stages() {
                             <DataTable.Cell end>Actions</DataTable.Cell>
                         </DataTable.Row>
                     </DataTable.Header>
-                    <DataTable.Body>
+                    <DataTable.Body loading={loading}>
                         {displayed.map((stage) => (
                             <DataTable.Row key={stage.id}>
                                 <DataTable.UserCell user={stage.student}>
-                                    {stage.student.name}
+                                    {stage.student?.name ?? "—"}
                                 </DataTable.UserCell>
                                 <DataTable.Cell>{stage.title}</DataTable.Cell>
-                                <DataTable.Cell truncate>{stage.company.name}</DataTable.Cell>
-                                <DataTable.Cell muted>{stage.group}</DataTable.Cell>
+                                <DataTable.Cell truncate>{stage.company?.name ?? "—"}</DataTable.Cell>
+                                <DataTable.Cell muted>{stage.group ?? "—"}</DataTable.Cell>
                                 <DataTable.Cell muted>
-                                    {new Date(stage.startDate).toLocaleDateString("fr-BE", {
-                                        day: "numeric",
-                                        month: "short",
-                                    })}
-                                    {" → "}
-                                    {new Date(stage.endDate).toLocaleDateString("fr-BE", {
-                                        day: "numeric",
-                                        month: "short",
-                                        year: "numeric",
-                                    })}
+                                    {stage.startDate
+                                        ? new Date(stage.startDate).toLocaleDateString("fr-BE", { day: "numeric", month: "short" })
+                                        : "—"}
+                                    {stage.startDate && stage.endDate && " → "}
+                                    {stage.endDate
+                                        ? new Date(stage.endDate).toLocaleDateString("fr-BE", { day: "numeric", month: "short", year: "numeric" })
+                                        : ""}
                                 </DataTable.Cell>
                                 <DataTable.Cell>
                                     <Tag status={stage.status} />
@@ -149,6 +169,7 @@ export default function Stages() {
                 </DataTable>
             </section>
 
+            <CreateStageModal isOpen={showCreate} onClose={() => setShowCreate(false)} onSave={handleCreate} />
             <StageSheet stage={selectedStage} onClose={() => setSelectedStage(null)} />
             <FilterModal
                 isOpen={showFilter}
@@ -160,7 +181,7 @@ export default function Stages() {
             <DeleteConfirm
                 isOpen={!!deleteTarget}
                 onClose={() => setDeleteTarget(null)}
-                onConfirm={() => setDeleteTarget(null)}
+                onConfirm={handleDelete}
                 message={`Supprimer le stage "${deleteTarget?.title}" ?`}
             />
         </>

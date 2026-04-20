@@ -1,13 +1,17 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import FormField from "@/components/ui/FormField/FormField";
+import { useAuth } from "@/contexts/AuthContext";
+import { signIn } from "@/api/auth";
 import styles from "./Login.module.scss";
 
 export default function Login() {
+    const { login } = useAuth();
+    const navigate = useNavigate();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [errors, setErrors] = useState({});
-    const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
 
     function validate() {
         const e = {};
@@ -18,11 +22,26 @@ export default function Login() {
         return e;
     }
 
-    function handleSubmit(ev) {
+    async function handleSubmit(ev) {
         ev.preventDefault();
         const e = validate();
         if (Object.keys(e).length) { setErrors(e); return; }
-        navigate("/");
+
+        setLoading(true);
+        try {
+            const { token, user } = await signIn(email, password);
+            login(token, user);
+            navigate("/");
+        } catch (err) {
+            const msg = err.response?.data?.error ?? err.response?.data?.message ?? "Identifiants incorrects.";
+            if (/v[eé]rifi|activ|not verified/i.test(msg)) {
+                navigate("/verify-email");
+                return;
+            }
+            setErrors({ global: msg });
+        } finally {
+            setLoading(false);
+        }
     }
 
     return (
@@ -34,6 +53,7 @@ export default function Login() {
                 </p>
             </div>
             <form className={styles.form} onSubmit={handleSubmit} noValidate>
+                {errors.global && <p className={styles.globalError}>{errors.global}</p>}
                 <FormField
                     label="Adresse e-mail"
                     type="email"
@@ -54,8 +74,8 @@ export default function Login() {
                     autoComplete="current-password"
                     required
                 />
-                <button type="submit" className={styles.submit}>
-                    Se connecter
+                <button type="submit" className={styles.submit} disabled={loading}>
+                    {loading ? "Connexion…" : "Se connecter"}
                 </button>
             </form>
             <p className={styles.footer}>

@@ -1,4 +1,6 @@
-import { messages } from "@/data/mock";
+import { useState, useEffect } from "react";
+import { getMessages } from "@/api/messages";
+import { useAuth } from "@/contexts/AuthContext";
 import { useSideMenu } from "./SideMenuContext";
 import styles from "./SideMenu.module.scss";
 
@@ -19,8 +21,16 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
 
 export default function SideMenu() {
-    const unreadCount = messages.filter((m) => !m.read).length;
+    const [unreadCount, setUnreadCount] = useState(0);
     const { isCollapsed, isMobileOpen, toggleCollapse, closeMobile } = useSideMenu();
+    const { user } = useAuth();
+    const role = user?.role; // 'student' | 'teacher' | 'manager' | 'admin'
+
+    useEffect(() => {
+        getMessages()
+            .then((msgs) => setUnreadCount(msgs.filter((m) => !m.read).length))
+            .catch(() => {});
+    }, []);
 
     const menuClass = [
         styles.sideMenu,
@@ -30,6 +40,12 @@ export default function SideMenu() {
         .filter(Boolean)
         .join(" ");
 
+    const isStudent  = role === "student";
+    const isTeacher  = role === "teacher";
+    const isManager  = role === "manager";
+    const isAdmin    = role === "admin";
+    const isStaff    = isTeacher || isManager || isAdmin;
+
     return (
         <>
             {isMobileOpen && (
@@ -37,61 +53,84 @@ export default function SideMenu() {
             )}
             <aside className={menuClass}>
                 <div className={styles.sideMenuHeader}>
-                    <img
-                        src={HEPLLogo}
-                        className={styles.HEPLLogo}
-                        alt="Logo de la HEPL"
-                    />
-                    {/* Collapse button – desktop only */}
+                    <img src={HEPLLogo} className={styles.HEPLLogo} alt="Logo de la HEPL" />
                     <button className={styles.collapseBtn} onClick={toggleCollapse}>
                         {isCollapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
                     </button>
-                    {/* Close button – mobile only */}
                     <button className={styles.closeBtn} onClick={closeMobile}>
                         <CloseIcon />
                     </button>
                 </div>
+
                 <nav>
                     <div>
+                        {/* Commun à tous */}
                         <NavLink href="/" icon={DashboardIcon}>
                             Tableau de bord
                         </NavLink>
 
-                        <div>
-                            <span className={styles.sectionLabel}>Mon stage</span>
-                            <NavLink href="/mon-stage" icon={MenuBookIcon}>
-                                Mes stages
-                            </NavLink>
-                            <NavLink href="/recherche" icon={SearchIcon}>
-                                Rechercher un stage
-                            </NavLink>
-                            <NavLink href="/inbox" icon={InboxIcon} badge={unreadCount}>
-                                Boîte de réception
-                            </NavLink>
-                            <NavLink href="/saved" icon={BookmarkIcon}>
-                                Enregistrés
-                            </NavLink>
-                        </div>
+                        {/* Section étudiant */}
+                        {isStudent && (
+                            <div>
+                                <span className={styles.sectionLabel}>Mon stage</span>
+                                <NavLink href="/mon-stage" icon={MenuBookIcon}>
+                                    Mon stage
+                                </NavLink>
+                                <NavLink href="/recherche" icon={SearchIcon}>
+                                    Rechercher un stage
+                                </NavLink>
+                                <NavLink href="/inbox" icon={InboxIcon} badge={unreadCount}>
+                                    Boîte de réception
+                                </NavLink>
+                                <NavLink href="/saved" icon={BookmarkIcon}>
+                                    Enregistrés
+                                </NavLink>
+                            </div>
+                        )}
 
-                        <div>
-                            <span className={styles.sectionLabel}>Étudiants</span>
-                            <NavLink href="/stages" icon={AssignmentIcon}>
-                                Liste des stages
-                            </NavLink>
-                            <NavLink href="/etudiants" icon={SchoolIcon}>
-                                Étudiants
-                            </NavLink>
-                        </div>
+                        {/* Section staff (prof / manager / admin) */}
+                        {isStaff && (
+                            <div>
+                                <span className={styles.sectionLabel}>Navigation</span>
+                                <NavLink href="/recherche" icon={SearchIcon}>
+                                    Rechercher un stage
+                                </NavLink>
+                                <NavLink href="/inbox" icon={InboxIcon} badge={unreadCount}>
+                                    Boîte de réception
+                                </NavLink>
+                                <NavLink href="/saved" icon={BookmarkIcon}>
+                                    Enregistrés
+                                </NavLink>
+                            </div>
+                        )}
 
-                        <div>
-                            <span className={styles.sectionLabel}>Administration</span>
-                            <NavLink href="/entreprises" icon={DomainIcon}>
-                                Liste des entreprises
-                            </NavLink>
-                            <NavLink href="/utilisateurs" icon={GroupIcon}>
-                                Utilisateurs
-                            </NavLink>
-                        </div>
+                        {/* Section gestion (prof / manager / admin) */}
+                        {isStaff && (
+                            <div>
+                                <span className={styles.sectionLabel}>Gestion</span>
+                                <NavLink href="/stages" icon={AssignmentIcon}>
+                                    Liste des stages
+                                </NavLink>
+                                <NavLink href="/etudiants" icon={SchoolIcon}>
+                                    Étudiants
+                                </NavLink>
+                            </div>
+                        )}
+
+                        {/* Section administration (manager / admin) */}
+                        {(isManager || isAdmin) && (
+                            <div>
+                                <span className={styles.sectionLabel}>Administration</span>
+                                <NavLink href="/entreprises" icon={DomainIcon}>
+                                    Entreprises
+                                </NavLink>
+                                {isAdmin && (
+                                    <NavLink href="/utilisateurs" icon={GroupIcon}>
+                                        Utilisateurs
+                                    </NavLink>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </nav>
             </aside>

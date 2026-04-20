@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { companies } from "@/data/mock";
+import { useState, useEffect, useMemo } from "react";
+import { getCompanies } from "@/api/companies";
 import { useSaved } from "@/contexts/SavedContext";
 import styles from "./Recherche.module.scss";
 
@@ -13,55 +13,69 @@ import FilterModal from "./FilterModal";
 import SortIcon from "@mui/icons-material/ImportExport";
 import FilterIcon from "@mui/icons-material/FilterList";
 
+const SORT_OPTIONS = [
+    { key: null,       label: "Par défaut"  },
+    { key: "name_asc", label: "Nom A → Z"  },
+    { key: "name_desc", label: "Nom Z → A" },
+];
+
 const FILTER_CONFIG = [
     {
         key: "domain",
         label: "Domaine",
         options: [
             { value: "Informatique", label: "Informatique" },
-            { value: "Agriculture", label: "Agriculture" },
-            { value: "Commerce", label: "Commerce" },
-            { value: "Industrie", label: "Industrie" },
+            { value: "Agriculture",  label: "Agriculture"  },
+            { value: "Commerce",     label: "Commerce"     },
+            { value: "Industrie",    label: "Industrie"    },
         ],
     },
     {
         key: "province",
         label: "Province",
         options: [
-            { value: "Liège", label: "Liège" },
-            { value: "Namur", label: "Namur" },
+            { value: "Liège",  label: "Liège"  },
+            { value: "Namur",  label: "Namur"  },
             { value: "Hainaut", label: "Hainaut" },
-        ],
-    },
-    {
-        key: "offers",
-        label: "Offres",
-        options: [
-            { value: "observation", label: "Stage d'observation" },
-            { value: "bac3", label: "Stage BAC3" },
         ],
     },
 ];
 
 export default function Recherche() {
     const { savedIds, toggleSaved } = useSaved();
+    const [companies, setCompanies] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [selectedCompany, setSelectedCompany] = useState(null);
     const [showFilter, setShowFilter] = useState(false);
     const [filters, setFilters] = useState({});
+    const [sortIdx, setSortIdx] = useState(0);
+
+    useEffect(() => {
+        getCompanies().then(setCompanies).finally(() => setLoading(false));
+    }, []);
+
+    function cycleSort() {
+        setSortIdx((i) => (i + 1) % SORT_OPTIONS.length);
+    }
 
     const activeFilterCount = Object.values(filters).flat().length;
+    const currentSort = SORT_OPTIONS[sortIdx];
 
-    const displayed = companies.filter((c) => {
-        if (filters.domain?.length && !filters.domain.includes(c.domain)) return false;
-        if (filters.province?.length && !filters.province.includes(c.province)) return false;
-        if (filters.offers?.length) {
-            const wantsObs = filters.offers.includes("observation");
-            const wantsBac3 = filters.offers.includes("bac3");
-            if (wantsObs && !c.offresObservation) return false;
-            if (wantsBac3 && !c.offres3e) return false;
+    const displayed = useMemo(() => {
+        let list = companies.filter((c) => {
+            if (filters.domain?.length   && !filters.domain.includes(c.domain))     return false;
+            if (filters.province?.length && !filters.province.includes(c.province)) return false;
+            return true;
+        });
+
+        if (currentSort.key === "name_asc") {
+            list = [...list].sort((a, b) => a.name.localeCompare(b.name, "fr"));
+        } else if (currentSort.key === "name_desc") {
+            list = [...list].sort((a, b) => b.name.localeCompare(a.name, "fr"));
         }
-        return true;
-    });
+
+        return list;
+    }, [companies, filters, currentSort]);
 
     return (
         <>
@@ -72,24 +86,34 @@ export default function Recherche() {
                 </div>
                 <Toolbar
                     searchBar={<SearchBar placeholder="Rechercher une entreprise..." />}
-                    sortButton={<ActionButton icon={SortIcon}>Les plus consultés</ActionButton>}
+                    sortButton={
+                        <ActionButton icon={SortIcon} onClick={cycleSort}>
+                            {currentSort.label}
+                        </ActionButton>
+                    }
                     filterButton={
                         <ActionButton icon={FilterIcon} onClick={() => setShowFilter(true)}>
                             Filtres{activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}
                         </ActionButton>
                     }
                 />
-                <div className={styles.companyList}>
-                    {displayed.map((company) => (
-                        <CompanyCard
-                            key={company.id}
-                            company={company}
-                            onLearnMore={() => setSelectedCompany(company)}
-                            isSaved={savedIds.has(company.id)}
-                            onToggleSave={() => toggleSaved(company.id)}
-                        />
-                    ))}
-                </div>
+                {loading ? (
+                    <p style={{ padding: "24px 0", color: "var(--text)", fontSize: "14px" }}>Chargement…</p>
+                ) : displayed.length === 0 ? (
+                    <p style={{ padding: "24px 0", color: "var(--text)", fontSize: "14px" }}>Aucune entreprise trouvée.</p>
+                ) : (
+                    <div className={styles.companyList}>
+                        {displayed.map((company) => (
+                            <CompanyCard
+                                key={company.id}
+                                company={company}
+                                onLearnMore={() => setSelectedCompany(company)}
+                                isSaved={savedIds.has(company.id)}
+                                onToggleSave={() => toggleSaved(company.id)}
+                            />
+                        ))}
+                    </div>
+                )}
             </section>
 
             <EntrepriseSheet company={selectedCompany} onClose={() => setSelectedCompany(null)} />

@@ -1,4 +1,4 @@
-import { useLocation, Routes, Route } from "react-router-dom";
+import { useLocation, Routes, Route, Navigate } from "react-router-dom";
 
 import { SideMenuProvider } from "../components/layout/SideMenu/SideMenuContext";
 import { SavedProvider } from "../contexts/SavedContext";
@@ -15,6 +15,7 @@ import Utilisateurs from "../pages/Utilisateurs";
 import Inbox from "../pages/Inbox";
 import Saved from "../pages/Saved";
 import Support from "../pages/Support";
+import ErrorPage from "../pages/ErrorPage";
 
 import SettingsModal from "../pages/SettingsModal";
 import ProfileModal from "../pages/ProfileModal";
@@ -47,6 +48,8 @@ export default function DashboardLayout() {
                     <Route path="inbox" element={<Inbox />} />
                     <Route path="saved" element={<Saved />} />
                     <Route path="support" element={<Support />} />
+                    <Route path="mon-dossier" element={<Navigate to="/mon-stage" replace />} />
+                    <Route path="*" element={<ErrorPage />} />
                 </Routes>
             </Main>
 

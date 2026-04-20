@@ -1,5 +1,204 @@
+// ─── Tabs ──────────────────────────────────────────────────────────────────────
+.tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 0;
+}
+
+.tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border: none;
+    background: none;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.15s, border-color 0.15s;
+    border-radius: 0;
+
+    svg { font-size: 18px !important; }
+
+    &:hover { color: var(--text-h); }
+
+    &.tabActive {
+        color: var(--accent);
+        border-bottom-color: var(--accent);
+    }
+}
+
+// ─── Stages list ──────────────────────────────────────────────────────────────
 .list {
     display: flex;
     flex-direction: column;
     gap: 16px;
+}
+
+// ─── Dossier ──────────────────────────────────────────────────────────────────
+.dossier {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.docList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.docCard {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    background: var(--bg);
+    transition: border-color 0.15s;
+
+    &.done {
+        border-color: #22c55e;
+        background: #f0fdf4;
+
+        [data-theme="dark"] & { background: rgba(34, 197, 94, 0.08); }
+    }
+
+    @media (max-width: 560px) { flex-wrap: wrap; }
+}
+
+.docStatus {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+}
+
+.iconDone    { font-size: 28px !important; color: #22c55e;      }
+.iconPending { font-size: 28px !important; color: var(--border); }
+
+.docInfo {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.docTitleRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.docLabel {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-h);
+}
+
+.required {
+    font-size: 11px;
+    font-weight: 700;
+    color: #ef4444;
+    background: #fef2f2;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid #fecaca;
+}
+
+.docHint {
+    font-size: 13px;
+    color: var(--text);
+}
+
+.fileName {
+    font-size: 12px;
+    font-weight: 600;
+    color: #22c55e;
+    margin-top: 2px;
+}
+
+.docActions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.iconBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 16px;
+    border: 2px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+
+    svg { font-size: 20px !important; }
+
+    &:hover { background: var(--accent-bg); color: var(--text-h); }
+}
+
+.uploadBtn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 20px 11px 14px;
+    border-radius: 16px;
+    border: 2px solid var(--border);
+    background: var(--bg);
+    color: var(--text-h);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    white-space: nowrap;
+
+    svg { font-size: 20px !important; }
+
+    &:hover {
+        background: var(--accent-bg);
+        border-color: var(--accent-border);
+    }
+}
+
+// ─── Progress ──────────────────────────────────────────────────────────────────
+.progress {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.progressLabel {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.progressBar {
+    height: 8px;
+    background: var(--accent-bg);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.progressFill {
+    height: 100%;
+    background: #22c55e;
+    border-radius: 999px;
+    transition: width 0.4s ease;
 }

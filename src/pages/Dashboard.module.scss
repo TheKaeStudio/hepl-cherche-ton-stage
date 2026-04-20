@@ -1,6 +1,6 @@
 .stats {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 16px;
 }
 
@@ -100,30 +100,82 @@
     font-weight: 500;
 }
 
-.notifList {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+.activityList {
     border: 2px solid var(--border);
     border-radius: 16px;
-    padding: 16px 20px;
+    overflow: hidden;
     background: var(--bg);
 }
 
-.notifItem {
-    font-size: 14px;
-    color: var(--text-h);
-    font-weight: 500;
+.activityItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    border-bottom: 2px solid var(--border);
+    background: var(--bg);
+
+    &:last-child { border-bottom: none; }
+
+    &.activityUnread { background: var(--accent-bg); }
 }
 
-@media screen and (max-width: 1200px) {
+.activityIcon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    svg { font-size: 18px !important; }
+}
+
+.activityContent {
+    flex: 1;
+    min-width: 0;
+}
+
+.activityMessage {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-h);
+}
+
+.activityDate {
+    font-size: 12px;
+    color: var(--text);
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+.activityDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+}
+
+.emptyActivity {
+    padding: 20px;
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    background: var(--bg);
+    font-size: 14px;
+    color: var(--text);
+}
+
+@media screen and (max-width: 480px) {
     .stats {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: 1fr;
         gap: 8px;
     }
 
     .statCard {
-        padding: 16px;
+        padding: 14px 16px;
     }
+
+    .statValue { font-size: 22px; }
 }

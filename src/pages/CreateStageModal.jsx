@@ -1,83 +1,97 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import Modal from "@/components/ui/Modal/Modal";
 import FormField from "@/components/ui/FormField/FormField";
-import { users, companies } from "@/data/mock";
+import { getUsers } from "@/api/users";
+import { createInternship } from "@/api/internships";
 import styles from "./CreateStageModal.module.scss";
 
 const TYPES = ["Bachelier", "Master", "Observation"];
-
-const GROUPS = [
-    { value: "", label: "Sélectionner un groupe" },
-    { value: "D301", label: "D301" },
-    { value: "D302", label: "D302" },
-    { value: "D303", label: "D303" },
-    { value: "D201", label: "D201" },
-    { value: "D202", label: "D202" },
-];
-
-const STUDENTS = [
-    { value: "", label: "Sélectionner un étudiant" },
-    ...users
-        .filter((u) => u.role === "etudiant")
-        .map((u) => ({ value: String(u.id), label: u.name })),
-];
-
-const COMPANIES = [
-    { value: "", label: "Sélectionner une entreprise" },
-    ...companies.map((c) => ({ value: String(c.id), label: c.name })),
-];
-
-const empty = {
-    type: "",
-    group: "",
-    studentId: "",
-    companyId: "",
-    supervisor: "",
-    startDate: "",
-    endDate: "",
-};
+const empty = { type: "", group: "", studentId: "", studentSearch: "" };
 
 export default function CreateStageModal({ isOpen, onClose, onSave }) {
     const [form, setForm] = useState(empty);
+    const [assignTo, setAssignTo] = useState("groupe");
     const [errors, setErrors] = useState({});
+    const [submitting, setSubmitting] = useState(false);
+    const [students, setStudents] = useState([]);
+    const [searchOpen, setSearchOpen] = useState(false);
+    const searchRef = useRef(null);
 
-    const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
+    useEffect(() => {
+        if (!isOpen) return;
+        getUsers()
+            .then((users) => setStudents(users.filter((u) => u.role === "etudiant")))
+            .catch(() => {});
+    }, [isOpen]);
+
+    useEffect(() => {
+        function handleClickOutside(e) {
+            if (searchRef.current && !searchRef.current.contains(e.target)) {
+                setSearchOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    const groups = useMemo(() => {
+        const seen = new Set();
+        const opts = [{ value: "", label: "Sélectionner un groupe" }];
+        for (const s of students) {
+            if (s.class && !seen.has(s.class)) {
+                seen.add(s.class);
+                opts.push({ value: s.class, label: s.class });
+            }
+        }
+        return opts;
+    }, [students]);
+
+    const filteredStudents = useMemo(() => {
+        const q = form.studentSearch.toLowerCase().trim();
+        if (!q) return students.slice(0, 8);
+        return students.filter((s) => s.name.toLowerCase().includes(q)).slice(0, 8);
+    }, [students, form.studentSearch]);
+
+    function handleStudentSelect(student) {
+        setForm((f) => ({ ...f, studentId: student.id, studentSearch: student.name }));
+        setSearchOpen(false);
+    }
 
     function validate() {
         const e = {};
         if (!form.type) e.type = "Le type de stage est requis.";
-        if (!form.group) e.group = "Le groupe est requis.";
-        if (!form.studentId) e.studentId = "L'étudiant est requis.";
-        if (!form.companyId) e.companyId = "L'entreprise est requise.";
-        if (!form.startDate) e.startDate = "La date de début est requise.";
-        if (!form.endDate) e.endDate = "La date de fin est requise.";
+        if (assignTo === "groupe" && !form.group) e.group = "Le groupe est requis.";
+        if (assignTo === "etudiant" && !form.studentId) e.studentId = "L'étudiant est requis.";
         return e;
     }
 
-    function handleSubmit(ev) {
+    async function handleSubmit(ev) {
         ev.preventDefault();
         const e = validate();
         if (Object.keys(e).length) { setErrors(e); return; }
-        const student = users.find((u) => String(u.id) === form.studentId);
-        const company = companies.find((c) => String(c.id) === form.companyId);
-        onSave?.({
-            title: `Stage ${form.type}`,
-            group: form.group,
-            student,
-            company,
-            supervisor: form.supervisor,
-            startDate: form.startDate,
-            endDate: form.endDate,
-            status: "non-rempli",
-        });
-        setForm(empty);
-        setErrors({});
-        onClose();
+
+        setSubmitting(true);
+        try {
+            const payload = { type: form.type };
+            if (assignTo === "groupe") payload.group = form.group;
+            else payload.students = [form.studentId];
+
+            const created = await createInternship(payload);
+            onSave?.(created);
+            setForm(empty);
+            setErrors({});
+            onClose();
+        } catch (err) {
+            setErrors({ global: err.response?.data?.error ?? "Une erreur est survenue." });
+        } finally {
+            setSubmitting(false);
+        }
     }
 
     function handleClose() {
         setForm(empty);
         setErrors({});
+        setAssignTo("groupe");
         onClose();
     }
 
@@ -86,19 +100,21 @@ export default function CreateStageModal({ isOpen, onClose, onSave }) {
             isOpen={isOpen}
             onClose={handleClose}
             title="Ajouter un stage"
-            size="lg"
+            size="sm"
             footer={
                 <div className={styles.footer}>
                     <button className={styles.cancelBtn} onClick={handleClose} type="button">
                         Annuler
                     </button>
-                    <button className={styles.saveBtn} form="createStageForm" type="submit">
-                        Enregistrer
+                    <button className={styles.saveBtn} form="createStageForm" type="submit" disabled={submitting}>
+                        {submitting ? "Enregistrement…" : "Enregistrer"}
                     </button>
                 </div>
             }
         >
             <form id="createStageForm" onSubmit={handleSubmit} className={styles.form}>
+                {errors.global && <p className={styles.error}>{errors.global}</p>}
+
                 <div className={styles.fieldGroup}>
                     <p className={styles.groupLabel}>Type de stage</p>
                     <div className={styles.chips}>
@@ -116,63 +132,67 @@ export default function CreateStageModal({ isOpen, onClose, onSave }) {
                     {errors.type && <p className={styles.error}>{errors.type}</p>}
                 </div>
 
-                <div className={styles.row}>
+                <div className={styles.fieldGroup}>
+                    <p className={styles.groupLabel}>Assigner à</p>
+                    <div className={styles.chips}>
+                        <button
+                            type="button"
+                            className={`${styles.chip} ${assignTo === "groupe" ? styles.chipActive : ""}`}
+                            onClick={() => { setAssignTo("groupe"); setForm((f) => ({ ...f, studentId: "", studentSearch: "" })); }}
+                        >
+                            Groupe
+                        </button>
+                        <button
+                            type="button"
+                            className={`${styles.chip} ${assignTo === "etudiant" ? styles.chipActive : ""}`}
+                            onClick={() => { setAssignTo("etudiant"); setForm((f) => ({ ...f, group: "" })); }}
+                        >
+                            Étudiant
+                        </button>
+                    </div>
+                </div>
+
+                {assignTo === "groupe" && (
                     <FormField
-                        label="Groupe concerné"
+                        label="Groupe"
                         type="select"
                         value={form.group}
-                        onChange={set("group")}
-                        options={GROUPS}
+                        onChange={(e) => setForm((f) => ({ ...f, group: e.target.value }))}
+                        options={groups}
                         error={errors.group}
                         required
                     />
-                    <FormField
-                        label="Étudiant"
-                        type="select"
-                        value={form.studentId}
-                        onChange={set("studentId")}
-                        options={STUDENTS}
-                        error={errors.studentId}
-                        required
-                    />
-                </div>
+                )}
 
-                <div className={styles.row}>
-                    <FormField
-                        label="Entreprise"
-                        type="select"
-                        value={form.companyId}
-                        onChange={set("companyId")}
-                        options={COMPANIES}
-                        error={errors.companyId}
-                        required
-                    />
-                    <FormField
-                        label="Superviseur"
-                        placeholder="Prénom Nom"
-                        value={form.supervisor}
-                        onChange={set("supervisor")}
-                    />
-                </div>
-
-                <div className={styles.row}>
-                    <FormField
-                        label="Date de début"
-                        type="date"
-                        value={form.startDate}
-                        onChange={set("startDate")}
-                        error={errors.startDate}
-                        required
-                    />
-                    <FormField
-                        label="Date de fin"
-                        type="date"
-                        value={form.endDate}
-                        onChange={set("endDate")}
-                        error={errors.endDate}
-                        required
-                    />
-                </div>
+                {assignTo === "etudiant" && (
+                    <div className={styles.fieldGroup}>
+                        <p className={styles.groupLabel}>Étudiant</p>
+                        <div className={styles.searchWrap} ref={searchRef}>
+                            <input
+                                className={styles.searchInput}
+                                placeholder="Rechercher un étudiant..."
+                                value={form.studentSearch}
+                                onChange={(e) => {
+                                    setForm((f) => ({ ...f, studentSearch: e.target.value, studentId: "" }));
+                                    setSearchOpen(true);
+                                }}
+                                onFocus={() => setSearchOpen(true)}
+                                autoComplete="off"
+                            />
+                            {searchOpen && filteredStudents.length > 0 && (
+                                <ul className={styles.suggestions}>
+                                    {filteredStudents.map((s) => (
+                                        <li key={s.id} onMouseDown={() => handleStudentSelect(s)}>
+                                            <span className={styles.suggestName}>{s.name}</span>
+                                            {s.class && <span className={styles.suggestGroup}>{s.class}</span>}
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+                        {errors.studentId && <p className={styles.error}>{errors.studentId}</p>}
+                    </div>
+                )}
             </form>
         </Modal>
     );

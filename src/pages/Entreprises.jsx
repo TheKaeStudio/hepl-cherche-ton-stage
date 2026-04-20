@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { DOMAIN_CONFIG } from "@/data/mock";
-import { getCompanies, createCompany, deleteCompany } from "@/api/companies";
+import { getCompanies, createCompany, deleteCompany, giveAccess } from "@/api/companies";
+import Modal from "@/components/ui/Modal/Modal";
 import SearchBar from "@/components/ui/SearchBar/SearchBar";
 import ActionButton from "@/components/ui/ActionButton/ActionButton";
 import Toolbar from "@/components/layout/Toolbar/Toolbar";
@@ -55,6 +56,7 @@ export default function Entreprises() {
     const [selectedCompany, setSelectedCompany] = useState(null);
     const [showCreate, setShowCreate] = useState(false);
     const [deleteTarget, setDeleteTarget] = useState(null);
+    const [accessLink, setAccessLink] = useState(null);
     const [sortKey, setSortKey] = useState(null);
     const [sortDir, setSortDir] = useState("asc");
     const [showFilter, setShowFilter] = useState(false);
@@ -66,20 +68,30 @@ export default function Entreprises() {
             .finally(() => setLoading(false));
     }, []);
 
-    async function handleCreate(form) {
-        const created = await createCompany({
-            id:          form.id || form.name.toLowerCase().replace(/\s+/g, "-"),
-            name:        form.name,
-            description: form.description,
-        });
+    async function handleCreate(payload) {
+        const created = await createCompany(payload);
         setCompanies((prev) => [created, ...prev]);
     }
 
     async function handleDelete() {
-        if (!deleteTarget) return;
-        await deleteCompany(deleteTarget.id);
-        setCompanies((prev) => prev.filter((c) => c.id !== deleteTarget.id));
+        const target = deleteTarget;
+        if (!target) return;
         setDeleteTarget(null);
+        await deleteCompany(target.id).catch(() => {});
+        setCompanies((prev) => prev.filter((c) => c.id !== target.id));
+    }
+
+    async function handleGiveAccess(company) {
+        try {
+            const result = await giveAccess(company.id);
+            const key = result?.key;
+            const link = key
+                ? `${window.location.origin}/company/acces?key=${key}`
+                : null;
+            setAccessLink({ company, link });
+        } catch {
+            setAccessLink({ company, link: null, error: true });
+        }
     }
 
     function handleSort(key) {
@@ -172,6 +184,7 @@ export default function Entreprises() {
                                     <DataTable.Cell muted>{company.contact?.name ?? "—"}</DataTable.Cell>
                                     <DataTable.Actions
                                         onView={() => setSelectedCompany(company)}
+                                        onGiveAccess={() => handleGiveAccess(company)}
                                         onDelete={() => setDeleteTarget(company)}
                                     />
                                 </DataTable.Row>
@@ -196,6 +209,49 @@ export default function Entreprises() {
                 onConfirm={handleDelete}
                 message={`Supprimer l'entreprise "${deleteTarget?.name}" ?`}
             />
+            <Modal
+                isOpen={!!accessLink}
+                onClose={() => setAccessLink(null)}
+                title={`Accès — ${accessLink?.company?.name ?? ""}`}
+                size="sm"
+            >
+                {accessLink?.error ? (
+                    <p style={{ color: "#ef4444", fontSize: "14px" }}>
+                        Erreur lors de la génération du lien.
+                    </p>
+                ) : accessLink?.link ? (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                        <p style={{ fontSize: "13px", color: "var(--text)" }}>
+                            Partagez ce lien avec l'entreprise pour qu'elle puisse modifier sa fiche :
+                        </p>
+                        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                            <input
+                                readOnly
+                                value={accessLink.link}
+                                style={{
+                                    flex: 1, padding: "10px 12px", borderRadius: "10px",
+                                    border: "2px solid var(--border)", background: "var(--bg-alt)",
+                                    fontSize: "13px", color: "var(--text-h)", fontFamily: "monospace",
+                                }}
+                            />
+                            <button
+                                onClick={() => navigator.clipboard.writeText(accessLink.link)}
+                                style={{
+                                    padding: "10px 16px", borderRadius: "10px", border: "2px solid var(--border)",
+                                    background: "var(--bg)", cursor: "pointer", fontSize: "13px", fontWeight: 700,
+                                    color: "var(--text-h)", fontFamily: "var(--sans)",
+                                }}
+                            >
+                                Copier
+                            </button>
+                        </div>
+                    </div>
+                ) : (
+                    <p style={{ fontSize: "14px", color: "var(--text)" }}>
+                        Lien généré, mais format inconnu. Vérifiez la réponse API.
+                    </p>
+                )}
+            </Modal>
         </>
     );
 }

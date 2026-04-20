@@ -32,4 +32,15 @@
     background: #202020;
     border: 2px solid #202020;
     color: #fff;
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}
+
+.error {
+    color: #ef4444;
+    font-size: 13px;
+    font-weight: 500;
 }

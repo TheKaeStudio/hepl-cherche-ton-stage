@@ -16,6 +16,16 @@
 
 .actions {
     display: flex;
-    gap: 12px;
+    gap: 8px;
     flex-shrink: 0;
+    overflow-x: auto;
+    // scrollbar invisible mais fonctionnel
+    scrollbar-width: none;
+    &::-webkit-scrollbar { display: none; }
+
+    // Sur mobile : prend toute la largeur et scroll si besoin
+    @media (max-width: 600px) {
+        width: 100%;
+        flex: 0 0 100%;
+    }
 }

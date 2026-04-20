@@ -1,0 +1,117 @@
+.page {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+.summaryGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+
+    @media (max-width: 900px) { grid-template-columns: repeat(2, 1fr); }
+    @media (max-width: 480px) { grid-template-columns: 1fr; gap: 8px; }
+}
+
+.statCard {
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--bg);
+}
+
+.statIcon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    svg { font-size: 24px !important; }
+}
+
+.statValue {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--text-h);
+    line-height: 1;
+    margin-bottom: 2px;
+}
+
+.statLabel {
+    font-size: 13px;
+    color: var(--text);
+    font-weight: 500;
+}
+
+.chartsGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+
+    @media (max-width: 700px) { grid-template-columns: 1fr; }
+}
+
+.chartCard {
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.chartTitle {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-h);
+}
+
+.bars {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.barRow {
+    display: grid;
+    grid-template-columns: 100px 1fr 36px;
+    align-items: center;
+    gap: 12px;
+
+    @media (max-width: 480px) { grid-template-columns: 80px 1fr 30px; }
+}
+
+.barLabel {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-h);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.barTrack {
+    height: 10px;
+    background: var(--accent-bg);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.barFill {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.4s ease;
+}
+
+.barValue {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    text-align: right;
+}

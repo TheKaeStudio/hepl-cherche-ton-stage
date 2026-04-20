@@ -11,6 +11,15 @@
     &.collapsed {
         width: 68px;
         min-width: 68px;
+
+        .sideMenuHeader {
+            justify-content: center;
+            padding: 12px 8px;
+        }
+
+        .HEPLLogo {
+            display: none;
+        }
     }
 
     &Header {

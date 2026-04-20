@@ -1,35 +1,47 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import FormField from "@/components/ui/FormField/FormField";
+import { signUp } from "@/api/auth";
 import styles from "./Signup.module.scss";
 
 export default function Signup() {
-    const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" });
-    const [errors, setErrors] = useState({});
     const navigate = useNavigate();
+    const [form, setForm] = useState({ firstname: "", lastname: "", email: "", password: "", confirm: "" });
+    const [errors, setErrors] = useState({});
+    const [loading, setLoading] = useState(false);
 
     const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
     function validate() {
         const e = {};
-        if (!form.name.trim()) e.name = "Le nom complet est requis.";
+        if (!form.firstname.trim()) e.firstname = "Le prénom est requis.";
+        if (!form.lastname.trim())  e.lastname  = "Le nom est requis.";
         if (!form.email) e.email = "L'adresse e-mail est requise.";
-        else if (!/^[^\s@]+@(student\.hepl\.be|hepl\.be)$/.test(form.email.trim().toLowerCase()))
-            e.email = "L'adresse doit être un @student.hepl.be ou @hepl.be.";
+        else if (!/^[^\s@]+@(student\.hepl\.be|hepl\.be)$/i.test(form.email.trim()))
+            e.email = "L'adresse doit être @student.hepl.be ou @hepl.be.";
         if (!form.password) e.password = "Le mot de passe est requis.";
         else if (form.password.length < 8)
             e.password = "Le mot de passe doit contenir au moins 8 caractères.";
-        if (!form.confirm) e.confirm = "Veuillez confirmer votre mot de passe.";
-        else if (form.password !== form.confirm)
+        if (form.password !== form.confirm)
             e.confirm = "Les mots de passe ne correspondent pas.";
         return e;
     }
 
-    function handleSubmit(ev) {
+    async function handleSubmit(ev) {
         ev.preventDefault();
         const e = validate();
         if (Object.keys(e).length) { setErrors(e); return; }
-        navigate("/");
+
+        setLoading(true);
+        try {
+            await signUp(form.firstname.trim(), form.lastname.trim(), form.email.trim(), form.password);
+            navigate("/verify-email");
+        } catch (err) {
+            const msg = err.response?.data?.error ?? "Une erreur est survenue.";
+            setErrors({ global: msg });
+        } finally {
+            setLoading(false);
+        }
     }
 
     return (
@@ -41,15 +53,27 @@ export default function Signup() {
                 </p>
             </div>
             <form className={styles.form} onSubmit={handleSubmit} noValidate>
-                <FormField
-                    label="Nom complet"
-                    placeholder="Prénom Nom"
-                    value={form.name}
-                    onChange={set("name")}
-                    error={errors.name}
-                    autoComplete="name"
-                    required
-                />
+                {errors.global && <p className={styles.globalError}>{errors.global}</p>}
+                <div className={styles.row}>
+                    <FormField
+                        label="Prénom"
+                        placeholder="Prénom"
+                        value={form.firstname}
+                        onChange={set("firstname")}
+                        error={errors.firstname}
+                        autoComplete="given-name"
+                        required
+                    />
+                    <FormField
+                        label="Nom"
+                        placeholder="Nom de famille"
+                        value={form.lastname}
+                        onChange={set("lastname")}
+                        error={errors.lastname}
+                        autoComplete="family-name"
+                        required
+                    />
+                </div>
                 <FormField
                     label="Adresse e-mail"
                     type="email"
@@ -81,8 +105,8 @@ export default function Signup() {
                     autoComplete="new-password"
                     required
                 />
-                <button type="submit" className={styles.submit}>
-                    Créer mon compte
+                <button type="submit" className={styles.submit} disabled={loading}>
+                    {loading ? "Création…" : "Créer mon compte"}
                 </button>
             </form>
             <p className={styles.footer}>

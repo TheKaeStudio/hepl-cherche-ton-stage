@@ -1,78 +1,120 @@
-import { useState, useMemo } from "react";
-import { users } from "@/data/mock";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { getUsers, updateUser, deleteUser } from "@/api/users";
+import { getGroups } from "@/api/groups";
 import SearchBar from "@/components/ui/SearchBar/SearchBar";
 import ActionButton from "@/components/ui/ActionButton/ActionButton";
 import Toolbar from "@/components/layout/Toolbar/Toolbar";
 import DataTable from "@/components/dataTable/DataTable";
-import Tag from "@/components/ui/Tag/Tag";
-import SendMessageModal from "./SendMessageModal";
+import Modal from "@/components/ui/Modal/Modal";
+import FormField from "@/components/ui/FormField/FormField";
+import UserSheet from "@/components/sheets/UserSheet";
 import DeleteConfirm from "@/components/ui/DeleteConfirm/DeleteConfirm";
 import FilterModal from "./FilterModal";
+import SendMessageModal from "./SendMessageModal";
+import styles from "./Etudiants.module.scss";
 
 import SortIcon from "@mui/icons-material/ImportExport";
 import FilterIcon from "@mui/icons-material/FilterList";
-import PlusIcon from "@mui/icons-material/Add";
-
-const students = users.filter((u) => u.role === "etudiant");
-
-const FILTER_CONFIG = [
-    {
-        key: "stageStatus",
-        label: "Statut de stage",
-        options: [
-            { value: "en-cours", label: "En cours" },
-            { value: "termine", label: "Terminé" },
-            { value: "non-rempli", label: "Non rempli" },
-        ],
-    },
-    {
-        key: "class",
-        label: "Groupe",
-        options: [
-            { value: "D301", label: "D301" },
-            { value: "D202", label: "D202" },
-        ],
-    },
-];
+import AddIcon from "@mui/icons-material/Add";
 
 export default function Etudiants() {
-    const [showMessage, setShowMessage] = useState(false);
+    const { user: currentUser } = useAuth();
+    const isManager = currentUser?.role === "manager" || currentUser?.role === "admin";
+
+    const [students,   setStudents]   = useState([]);
+    const [loading,    setLoading]    = useState(true);
+    const [groups,     setGroups]     = useState([]);
+
+    const [viewTarget,   setViewTarget]   = useState(null);
+    const [editTarget,   setEditTarget]   = useState(null);
     const [deleteTarget, setDeleteTarget] = useState(null);
-    const [sortKey, setSortKey] = useState(null);
-    const [sortDir, setSortDir] = useState("asc");
+    const [editGroup,    setEditGroup]    = useState("");
+    const [editSaving,   setEditSaving]   = useState(false);
+
+    const [showMessage,     setShowMessage]     = useState(false);
+    const [showMenu,        setShowMenu]        = useState(false);
+    const [showCreateGroup, setShowCreateGroup] = useState(false);
+    const [newGroupName,    setNewGroupName]    = useState("");
+    const menuRef = useRef(null);
+
+    const [sortKey,    setSortKey]    = useState(null);
+    const [sortDir,    setSortDir]    = useState("asc");
     const [showFilter, setShowFilter] = useState(false);
-    const [filters, setFilters] = useState({});
+    const [filters,    setFilters]    = useState({});
+
+    useEffect(() => {
+        function handleClickOutside(e) {
+            if (menuRef.current && !menuRef.current.contains(e.target)) setShowMenu(false);
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    useEffect(() => {
+        getUsers()
+            .then((list) => {
+                const studs = list.filter((u) => u.role === "etudiant");
+                setStudents(studs);
+                const seen = new Set();
+                studs.forEach((s) => { if (s.class) seen.add(s.class); });
+                setGroups([...seen].sort());
+            })
+            .finally(() => setLoading(false));
+    }, []);
 
     function handleSort(key) {
-        if (sortKey === key) {
-            setSortDir((d) => (d === "asc" ? "desc" : "asc"));
-        } else {
-            setSortKey(key);
-            setSortDir("asc");
+        if (sortKey === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+        else { setSortKey(key); setSortDir("asc"); }
+    }
+
+    function handleCreateGroup() {
+        const name = newGroupName.trim().toUpperCase();
+        if (!name || groups.includes(name)) return;
+        setGroups((prev) => [...prev, name].sort());
+        setNewGroupName("");
+        setShowCreateGroup(false);
+    }
+
+    async function handleSaveGroup() {
+        if (!editTarget) return;
+        setEditSaving(true);
+        try {
+            const updated = await updateUser(editTarget.id, { promotion: editGroup || null });
+            setStudents((prev) => prev.map((s) => s.id === updated.id ? updated : s));
+            if (editGroup && !groups.includes(editGroup)) {
+                setGroups((prev) => [...prev, editGroup].sort());
+            }
+            setEditTarget(null);
+        } finally {
+            setEditSaving(false);
         }
     }
 
+    const FILTER_CONFIG = useMemo(() => [
+        {
+            key: "class",
+            label: "Groupe",
+            options: groups.map((g) => ({ value: g, label: g })),
+        },
+    ], [groups]);
+
+    const groupOptions = useMemo(() => [
+        { value: "", label: "Aucun groupe" },
+        ...groups.map((g) => ({ value: g, label: g })),
+    ], [groups]);
+
     const displayed = useMemo(() => {
         let list = [...students];
-
-        if (filters.stageStatus?.length) {
-            list = list.filter((s) => filters.stageStatus.includes(s.stageStatus));
-        }
-        if (filters.class?.length) {
-            list = list.filter((s) => filters.class.includes(s.class));
-        }
-
+        if (filters.class?.length) list = list.filter((s) => filters.class.includes(s.class));
         if (sortKey) {
             list.sort((a, b) => {
-                const aVal = a[sortKey] ?? "";
-                const bVal = b[sortKey] ?? "";
-                const cmp = String(aVal).localeCompare(String(bVal), "fr");
+                const cmp = String(a[sortKey] ?? "").localeCompare(String(b[sortKey] ?? ""), "fr");
                 return sortDir === "asc" ? cmp : -cmp;
             });
         }
-
         return list;
-    }, [sortKey, sortDir, filters]);
+    }, [students, sortKey, sortDir, filters]);
 
     const activeFilterCount = Object.values(filters).flat().length;
 
@@ -94,11 +136,23 @@ export default function Etudiants() {
                             Filtres{activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}
                         </ActionButton>
                     }
-                    createButton={
-                        <ActionButton icon={PlusIcon} filled onClick={() => setShowMessage(true)}>
-                            Envoyer un message
-                        </ActionButton>
-                    }
+                    createButton={isManager ? (
+                        <div className={styles.menuWrap} ref={menuRef}>
+                            <button className={styles.addBtn} onClick={() => setShowMenu((v) => !v)}>
+                                <AddIcon fontSize="small" />
+                            </button>
+                            {showMenu && (
+                                <div className={styles.dropMenu}>
+                                    <button onClick={() => { setShowMenu(false); setShowMessage(true); }}>
+                                        Envoyer un message
+                                    </button>
+                                    <button onClick={() => { setShowMenu(false); setShowCreateGroup(true); }}>
+                                        Créer un groupe
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    ) : null}
                 />
                 <DataTable>
                     <DataTable.Header sortKey={sortKey} sortDir={sortDir} onSort={handleSort}>
@@ -106,28 +160,19 @@ export default function Etudiants() {
                             <DataTable.SortableCell column="name">Nom</DataTable.SortableCell>
                             <DataTable.SortableCell column="class">Groupe</DataTable.SortableCell>
                             <DataTable.Cell>Email</DataTable.Cell>
-                            <DataTable.SortableCell column="stageStatus">Statut</DataTable.SortableCell>
                             <DataTable.Cell end>Actions</DataTable.Cell>
                         </DataTable.Row>
                     </DataTable.Header>
-                    <DataTable.Body>
+                    <DataTable.Body loading={loading}>
                         {displayed.map((student) => (
                             <DataTable.Row key={student.id}>
-                                <DataTable.UserCell user={student}>
-                                    {student.name}
-                                </DataTable.UserCell>
+                                <DataTable.UserCell user={student}>{student.name}</DataTable.UserCell>
                                 <DataTable.Cell muted>{student.class ?? "—"}</DataTable.Cell>
                                 <DataTable.Cell muted>{student.email}</DataTable.Cell>
-                                <DataTable.Cell>
-                                    {student.stageStatus
-                                        ? <Tag status={student.stageStatus} />
-                                        : <span style={{ color: "var(--text)", fontSize: "14px" }}>—</span>
-                                    }
-                                </DataTable.Cell>
                                 <DataTable.Actions
-                                    onEdit={() => {}}
-                                    onView={() => {}}
-                                    onDelete={() => setDeleteTarget(student)}
+                                    onView={() => setViewTarget(student)}
+                                    onEdit={isManager ? () => { setEditTarget(student); setEditGroup(student.class ?? ""); } : undefined}
+                                    onDelete={isManager ? () => setDeleteTarget(student) : undefined}
                                 />
                             </DataTable.Row>
                         ))}
@@ -135,7 +180,54 @@ export default function Etudiants() {
                 </DataTable>
             </section>
 
+            <UserSheet user={viewTarget} onClose={() => setViewTarget(null)} />
             <SendMessageModal isOpen={showMessage} onClose={() => setShowMessage(false)} />
+
+            {/* Modifier groupe étudiant */}
+            <Modal
+                isOpen={!!editTarget}
+                onClose={() => setEditTarget(null)}
+                title={`Groupe — ${editTarget?.name ?? ""}`}
+                size="sm"
+                footer={
+                    <div className={styles.footer}>
+                        <button className={styles.cancelBtn} onClick={() => setEditTarget(null)} type="button">Annuler</button>
+                        <button className={styles.saveBtn} onClick={handleSaveGroup} disabled={editSaving}>
+                            {editSaving ? "Enregistrement…" : "Enregistrer"}
+                        </button>
+                    </div>
+                }
+            >
+                <FormField
+                    label="Groupe"
+                    type="select"
+                    value={editGroup}
+                    onChange={(e) => setEditGroup(e.target.value)}
+                    options={groupOptions}
+                />
+            </Modal>
+
+            {/* Créer un groupe */}
+            <Modal
+                isOpen={showCreateGroup}
+                onClose={() => { setShowCreateGroup(false); setNewGroupName(""); }}
+                title="Créer un groupe"
+                size="sm"
+                footer={
+                    <div className={styles.footer}>
+                        <button className={styles.cancelBtn} onClick={() => setShowCreateGroup(false)} type="button">Annuler</button>
+                        <button className={styles.saveBtn} onClick={handleCreateGroup} disabled={!newGroupName.trim()}>Créer</button>
+                    </div>
+                }
+            >
+                <FormField
+                    label="Nom du groupe"
+                    placeholder="ex: D301"
+                    value={newGroupName}
+                    onChange={(e) => setNewGroupName(e.target.value.toUpperCase())}
+                />
+            </Modal>
+
             <FilterModal
                 isOpen={showFilter}
                 onClose={() => setShowFilter(false)}
@@ -146,7 +238,13 @@ export default function Etudiants() {
             <DeleteConfirm
                 isOpen={!!deleteTarget}
                 onClose={() => setDeleteTarget(null)}
-                onConfirm={() => setDeleteTarget(null)}
+                onConfirm={async () => {
+                    const target = deleteTarget;
+                    if (!target?.id) return;
+                    setDeleteTarget(null);
+                    await deleteUser(target.id).catch(() => {});
+                    setStudents((prev) => prev.filter((s) => s.id !== target.id));
+                }}
                 message={`Supprimer l'étudiant "${deleteTarget?.name}" ?`}
             />
         </>

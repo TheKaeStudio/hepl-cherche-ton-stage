@@ -1,21 +1,22 @@
 import client from "./client";
 
-function normalizeCompany(c) {
+export function normalizeCompany(c) {
     return {
-        id:       c._id,
-        // Slug kept for reference
-        slug:     c.id,
-        name:     c.name,
+        id:          c._id,
+
+        name:        c.name,
         description: c.description,
-        // Fields not yet in the API — kept null until backend provides them
-        logo:     null,
-        province: null,
-        domain:   null,
-        website:  null,
-        contact:  null,
-        offresObservation: false,
-        offres3e: false,
-        invite:   c.invite,
+        domain:      c.sector ?? null,
+        province:    c.address?.province ?? c.address?.city ?? null,
+        address:     c.address ?? null,
+        website:     c.website ?? null,
+        phone:       c.phone ?? null,
+        size:        c.size ?? null,
+        contact:     c.contactPerson ?? null,
+        logo:        c.logo ?? null,
+        offresObservation: c.offresObservation ?? false,
+        offres3e:          c.offres3e ?? false,
+        invite:      c.invite ?? null,
     };
 }
 
@@ -24,11 +25,26 @@ export async function getCompanies() {
     return data.companies.map(normalizeCompany);
 }
 
-export async function createCompany({ id, name, description }) {
-    const { data } = await client.post("/company/create", { id, name, description });
+export async function getCompany(id) {
+    const { data } = await client.get(`/company/${id}`);
+    return normalizeCompany(data.company);
+}
+
+export async function createCompany(payload) {
+    const { data } = await client.post("/company/create", payload);
+    return normalizeCompany(data.company);
+}
+
+export async function updateCompany(id, payload) {
+    const { data } = await client.put(`/company/update/${id}`, payload);
     return normalizeCompany(data.company);
 }
 
 export async function deleteCompany(id) {
     await client.delete(`/company/delete/${id}`);
+}
+
+export async function giveAccess(id) {
+    const { data } = await client.post(`/company/${id}/give-access`);
+    return data;
 }

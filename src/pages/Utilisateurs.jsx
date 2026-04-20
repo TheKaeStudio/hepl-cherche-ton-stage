@@ -1,26 +1,29 @@
 import { useState, useMemo, useEffect } from "react";
 import { ROLE_LABEL } from "@/data/mock";
-import { getUsers } from "@/api/users";
+import { getUsers, deleteUser } from "@/api/users";
 import SearchBar from "@/components/ui/SearchBar/SearchBar";
 import ActionButton from "@/components/ui/ActionButton/ActionButton";
 import Toolbar from "@/components/layout/Toolbar/Toolbar";
 import DataTable from "@/components/dataTable/DataTable";
 import SendMessageModal from "./SendMessageModal";
+import EditUserModal from "./EditUserModal";
+import UserSheet from "@/components/sheets/UserSheet";
 import DeleteConfirm from "@/components/ui/DeleteConfirm/DeleteConfirm";
 import FilterModal from "./FilterModal";
 
 import SortIcon from "@mui/icons-material/ImportExport";
 import FilterIcon from "@mui/icons-material/FilterList";
-import PlusIcon from "@mui/icons-material/Add";
+import MessageIcon from "@mui/icons-material/MailOutlined";
 
 const FILTER_CONFIG = [
     {
         key: "role",
         label: "Rôle",
         options: [
-            { value: "etudiant", label: "Étudiant" },
-            { value: "enseignant", label: "Enseignant" },
-            { value: "admin", label: "Administrateur" },
+            { value: "etudiant",   label: "Étudiant"       },
+            { value: "enseignant", label: "Enseignant"      },
+            { value: "manager",    label: "Manager"         },
+            { value: "admin",      label: "Administrateur"  },
         ],
     },
 ];
@@ -29,6 +32,8 @@ export default function Utilisateurs() {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showMessage, setShowMessage] = useState(false);
+    const [viewTarget,   setViewTarget]   = useState(null);
+    const [editTarget,   setEditTarget]   = useState(null);
     const [deleteTarget, setDeleteTarget] = useState(null);
     const [sortKey, setSortKey] = useState(null);
     const [sortDir, setSortDir] = useState("asc");
@@ -40,6 +45,10 @@ export default function Utilisateurs() {
             .then(setUsers)
             .finally(() => setLoading(false));
     }, []);
+
+    function handleUserSaved(updated) {
+        setUsers((prev) => prev.map((u) => u.id === updated.id ? updated : u));
+    }
 
     function handleSort(key) {
         if (sortKey === key) {
@@ -90,7 +99,7 @@ export default function Utilisateurs() {
                         </ActionButton>
                     }
                     createButton={
-                        <ActionButton icon={PlusIcon} filled onClick={() => setShowMessage(true)}>
+                        <ActionButton icon={MessageIcon} filled onClick={() => setShowMessage(true)}>
                             Envoyer un message
                         </ActionButton>
                     }
@@ -101,7 +110,6 @@ export default function Utilisateurs() {
                             <DataTable.SortableCell column="name">Nom</DataTable.SortableCell>
                             <DataTable.SortableCell column="role">Rôle</DataTable.SortableCell>
                             <DataTable.Cell>Email</DataTable.Cell>
-                            <DataTable.Cell>Téléphone</DataTable.Cell>
                             <DataTable.Cell end>Actions</DataTable.Cell>
                         </DataTable.Row>
                     </DataTable.Header>
@@ -113,10 +121,9 @@ export default function Utilisateurs() {
                                 </DataTable.UserCell>
                                 <DataTable.Cell muted>{ROLE_LABEL[user.role] ?? user.role}</DataTable.Cell>
                                 <DataTable.Cell muted>{user.email}</DataTable.Cell>
-                                <DataTable.Cell muted>{user.phone}</DataTable.Cell>
                                 <DataTable.Actions
-                                    onEdit={() => {}}
-                                    onView={() => {}}
+                                    onView={() => setViewTarget(user)}
+                                    onEdit={() => setEditTarget(user)}
                                     onDelete={() => setDeleteTarget(user)}
                                 />
                             </DataTable.Row>
@@ -125,7 +132,13 @@ export default function Utilisateurs() {
                 </DataTable>
             </section>
 
+            <UserSheet user={viewTarget} onClose={() => setViewTarget(null)} />
             <SendMessageModal isOpen={showMessage} onClose={() => setShowMessage(false)} />
+            <EditUserModal
+                user={editTarget}
+                onClose={() => setEditTarget(null)}
+                onSave={handleUserSaved}
+            />
             <FilterModal
                 isOpen={showFilter}
                 onClose={() => setShowFilter(false)}
@@ -136,7 +149,13 @@ export default function Utilisateurs() {
             <DeleteConfirm
                 isOpen={!!deleteTarget}
                 onClose={() => setDeleteTarget(null)}
-                onConfirm={() => setDeleteTarget(null)}
+                onConfirm={async () => {
+                    const target = deleteTarget;
+                    if (!target?.id) return;
+                    setDeleteTarget(null);
+                    await deleteUser(target.id).catch(() => {});
+                    setUsers((prev) => prev.filter((u) => u.id !== target.id));
+                }}
                 message={`Supprimer l'utilisateur "${deleteTarget?.name}" ?`}
             />
         </>

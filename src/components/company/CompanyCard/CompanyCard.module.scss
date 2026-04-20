@@ -36,8 +36,8 @@
         & img {
             width: 60px;
             height: 60px;
-            border: 1px solid var(--border);
-            border-radius: 100%;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
             flex-shrink: 0;
             object-fit: contain;
         }
@@ -46,8 +46,8 @@
     & .logoPlaceholder {
         width: 60px;
         height: 60px;
-        border: 1px solid var(--border);
-        border-radius: 100%;
+        border: 1.5px solid var(--border);
+        border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -69,13 +69,34 @@
         padding-top: 16px;
         border-top: 2px solid var(--border);
 
-        & .iconLabelList {
+        & .contactLinks {
             display: flex;
             flex-wrap: wrap;
             align-items: center;
-            gap: 12px 20px;
-            flex: 1;
+            gap: 8px 16px;
+            flex: 1 1 100%;
             min-width: 0;
+            max-width: fit-content;
+        }
+
+        & .contactLink {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            text-decoration: none;
+            padding: 6px 10px;
+            border-radius: 8px;
+            transition: background 0.15s, color 0.15s;
+
+            svg { font-size: 16px !important; }
+
+            &:hover {
+                background: var(--accent-bg);
+                color: var(--text-h);
+            }
         }
 
         & .cardButtons {
@@ -84,33 +105,13 @@
             gap: 8px;
             flex-shrink: 0;
             margin-left: auto;
-        }
 
-        & .saveBtn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            border: 1.5px solid var(--border);
-            background: transparent;
-            color: var(--text);
-            cursor: pointer;
-            transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
-
-            svg { font-size: 20px !important; }
-
-            &:hover {
-                background: var(--accent-bg);
-                color: var(--text-h);
-            }
-
-            &.saveBtnActive {
-                background: var(--accent-bg);
-                color: var(--accent);
-                border-color: var(--accent-border);
+            @media (max-width: 480px) {
+                margin-left: 0;
+                width: 100%;
+                & > *:last-child { flex: 1; justify-content: center; }
             }
         }
+
     }
 }

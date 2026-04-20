@@ -84,6 +84,7 @@
     border: 2px solid var(--border);
     color: var(--text-h);
     transition: opacity 0.15s;
+    white-space: nowrap;
 
     &:hover { opacity: 0.75; }
 }
@@ -100,6 +101,7 @@
     border: 2px solid var(--accent);
     color: var(--bg);
     transition: opacity 0.15s;
+    white-space: nowrap;
 
     &:hover { opacity: 0.85; }
 }

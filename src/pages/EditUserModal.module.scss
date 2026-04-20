@@ -1,0 +1,42 @@
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.footer {
+    display: flex;
+    gap: 10px;
+}
+
+.cancelBtn,
+.saveBtn {
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: var(--sans);
+    transition: opacity 0.15s;
+
+    &:hover { opacity: 0.85; }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.cancelBtn {
+    background: var(--bg);
+    border: 2px solid var(--border);
+    color: var(--text-h);
+}
+
+.saveBtn {
+    background: #202020;
+    border: 2px solid #202020;
+    color: #fff;
+}
+
+.error {
+    color: #ef4444;
+    font-size: 13px;
+    font-weight: 500;
+}

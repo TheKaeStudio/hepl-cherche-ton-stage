@@ -28,14 +28,18 @@ export default function StageCard({ stage, onLearnMore }) {
 
             <div className={styles.footer}>
                 <div className={styles.contacts}>
-                    <a href={`mailto:${stage.company.contact.email}`} className={styles.contactBtn}>
-                        <EmailIcon />
-                        <span>Envoyer un mail</span>
-                    </a>
-                    <a href={`tel:${stage.company.contact.phone}`} className={styles.contactBtn}>
-                        <PhoneIcon />
-                        <span>Appeler</span>
-                    </a>
+                    {stage.company?.contact?.email && (
+                        <a href={`mailto:${stage.company.contact.email}`} className={styles.contactBtn}>
+                            <EmailIcon />
+                            <span>Envoyer un mail</span>
+                        </a>
+                    )}
+                    {stage.company?.contact?.phone && (
+                        <a href={`tel:${stage.company.contact.phone}`} className={styles.contactBtn}>
+                            <PhoneIcon />
+                            <span>Appeler</span>
+                        </a>
+                    )}
                 </div>
                 <div className={styles.learnMore}>
                     <ActionButton icon={ArrowRightIcon} reversed onClick={onLearnMore}>

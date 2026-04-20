@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { companies } from "@/data/mock";
+import { useState, useEffect, useMemo } from "react";
+import { getCompanies } from "@/api/companies";
 import { useSaved } from "@/contexts/SavedContext";
 import SearchBar from "@/components/ui/SearchBar/SearchBar";
 import ActionButton from "@/components/ui/ActionButton/ActionButton";
@@ -13,8 +13,20 @@ import FilterIcon from "@mui/icons-material/FilterList";
 
 export default function Saved() {
     const { savedIds, toggleSaved } = useSaved();
+    const [companies, setCompanies] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [selectedCompany, setSelectedCompany] = useState(null);
-    const savedCompanies = companies.filter((c) => savedIds.has(c.id));
+
+    useEffect(() => {
+        getCompanies()
+            .then(setCompanies)
+            .finally(() => setLoading(false));
+    }, []);
+
+    const savedCompanies = useMemo(
+        () => companies.filter((c) => savedIds.has(c.id)),
+        [companies, savedIds]
+    );
 
     return (
         <>
@@ -23,12 +35,7 @@ export default function Saved() {
                     <h2>Entreprises enregistrées</h2>
                     <p>Les entreprises que vous avez mises de côté.</p>
                 </div>
-                <Toolbar
-                    searchBar={<SearchBar placeholder="Rechercher..." />}
-                    sortButton={<ActionButton icon={SortIcon}>Les plus consultés</ActionButton>}
-                    filterButton={<ActionButton icon={FilterIcon}>Filtres</ActionButton>}
-                />
-                {savedCompanies.length === 0 ? (
+                {!loading && savedCompanies.length === 0 ? (
                     <p>Aucune entreprise enregistrée.</p>
                 ) : (
                     <div className={styles.list}>

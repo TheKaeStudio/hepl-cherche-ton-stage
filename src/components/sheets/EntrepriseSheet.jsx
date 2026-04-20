@@ -3,9 +3,9 @@ import InfoGrid from "@/components/ui/InfoGrid/InfoGrid";
 import styles from "./EntrepriseSheet.module.scss";
 import EmailIcon from "@mui/icons-material/EmailOutlined";
 import PhoneIcon from "@mui/icons-material/PhoneOutlined";
-import WebIcon from "@mui/icons-material/Language";
 import CheckIcon from "@mui/icons-material/CheckCircleOutlined";
 import CloseIcon from "@mui/icons-material/CancelOutlined";
+import DomainIcon from "@mui/icons-material/Domain";
 
 export default function EntrepriseSheet({ company, onClose }) {
     return (
@@ -13,8 +13,16 @@ export default function EntrepriseSheet({ company, onClose }) {
             {company && (
                 <>
                     <div className={styles.header}>
-                        <h2 className={styles.name}>{company.name}</h2>
-                        <p className={styles.province}>{company.province}</p>
+                        <div className={styles.logoWrap}>
+                            {company.logo
+                                ? <img src={company.logo} alt={company.name} />
+                                : <DomainIcon />
+                            }
+                        </div>
+                        <div className={styles.headerText}>
+                            <h2 className={styles.name}>{company.name}</h2>
+                            {company.province && <p className={styles.province}>{company.province}</p>}
+                        </div>
                     </div>
 
                     {company.description && (
@@ -45,18 +53,24 @@ export default function EntrepriseSheet({ company, onClose }) {
                         )}
                     </InfoGrid>
 
-                    <div className={styles.contactSection}>
-                        <p className={styles.sectionLabel}>Contact</p>
-                        <p className={styles.contactName}>{company.contact.name}</p>
-                        <a href={`mailto:${company.contact.email}`} className={styles.contactLink}>
-                            <EmailIcon />
-                            {company.contact.email}
-                        </a>
-                        <a href={`tel:${company.contact.phone}`} className={styles.contactLink}>
-                            <PhoneIcon />
-                            {company.contact.phone}
-                        </a>
-                    </div>
+                    {company.contact && (
+                        <div className={styles.contactSection}>
+                            <p className={styles.sectionLabel}>Contact</p>
+                            <p className={styles.contactName}>{company.contact.name}</p>
+                            {company.contact.email && (
+                                <a href={`mailto:${company.contact.email}`} className={styles.contactLink}>
+                                    <EmailIcon />
+                                    {company.contact.email}
+                                </a>
+                            )}
+                            {company.contact.phone && (
+                                <a href={`tel:${company.contact.phone}`} className={styles.contactLink}>
+                                    <PhoneIcon />
+                                    {company.contact.phone}
+                                </a>
+                            )}
+                        </div>
+                    )}
                 </>
             )}
         </RightSheet>
