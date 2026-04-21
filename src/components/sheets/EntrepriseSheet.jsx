@@ -53,22 +53,28 @@ export default function EntrepriseSheet({ company, onClose }) {
                         )}
                     </InfoGrid>
 
-                    {company.contact && (
+                    {(company.contacts?.length > 0) && (
                         <div className={styles.contactSection}>
-                            <p className={styles.sectionLabel}>Contact</p>
-                            <p className={styles.contactName}>{company.contact.name}</p>
-                            {company.contact.email && (
-                                <a href={`mailto:${company.contact.email}`} className={styles.contactLink}>
-                                    <EmailIcon />
-                                    {company.contact.email}
-                                </a>
-                            )}
-                            {company.contact.phone && (
-                                <a href={`tel:${company.contact.phone}`} className={styles.contactLink}>
-                                    <PhoneIcon />
-                                    {company.contact.phone}
-                                </a>
-                            )}
+                            <p className={styles.sectionLabel}>
+                                {company.contacts.length > 1 ? "Contacts" : "Contact"}
+                            </p>
+                            {company.contacts.map((ct, i) => (
+                                <div key={i} className={i > 0 ? styles.contactSeparator : undefined}>
+                                    <p className={styles.contactName}>{ct.name}</p>
+                                    {ct.email && (
+                                        <a href={`mailto:${ct.email}`} className={styles.contactLink}>
+                                            <EmailIcon />
+                                            {ct.email}
+                                        </a>
+                                    )}
+                                    {ct.phone && (
+                                        <a href={`tel:${ct.phone}`} className={styles.contactLink}>
+                                            <PhoneIcon />
+                                            {ct.phone}
+                                        </a>
+                                    )}
+                                </div>
+                            ))}
                         </div>
                     )}
                 </>

@@ -3,34 +3,16 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getCompany, updateCompany } from "@/api/companies";
 import { uploadImage } from "@/api/upload";
 import { useSecteurs } from "@/contexts/SecteurContext";
+import { SIZES, PROVINCES } from "@/data/company";
 import FormField from "@/components/ui/FormField/FormField";
+import CustomRadio from "@/components/ui/CustomRadio/CustomRadio";
+import CustomCheckbox from "@/components/ui/CustomCheckbox/CustomCheckbox";
 import styles from "./EditEntreprisePage.module.scss";
 
 import AddIcon    from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/RemoveCircleOutlined";
 import ArrowBack  from "@mui/icons-material/ArrowBack";
 import PhotoIcon  from "@mui/icons-material/AddPhotoAlternateOutlined";
-
-const SIZES = [
-    { value: "",    label: "Sélectionner une taille" },
-    { value: "TPE", label: "TPE (< 10 employés)" },
-    { value: "PME", label: "PME (10–249 employés)" },
-    { value: "ETI", label: "ETI (250–4999 employés)" },
-    { value: "GE",  label: "Grande Entreprise (5000+)" },
-];
-
-const PROVINCES = [
-    { value: "",               label: "Sélectionner une province" },
-    { value: "Liège",          label: "Liège" },
-    { value: "Namur",          label: "Namur" },
-    { value: "Luxembourg",     label: "Luxembourg" },
-    { value: "Hainaut",        label: "Hainaut" },
-    { value: "Brabant Wallon", label: "Brabant Wallon" },
-    { value: "Bruxelles",      label: "Bruxelles" },
-    { value: "Brabant Flamand",label: "Brabant Flamand" },
-    { value: "Anvers",         label: "Anvers" },
-    { value: "Gand",           label: "Gand" },
-];
 
 const emptyContact = () => ({ name: "", email: "", phone: "" });
 
@@ -74,7 +56,8 @@ export default function EditEntreprisePage() {
                     offresObservation: c.offresObservation ?? false,
                     offres3e:    c.offres3e ?? false,
                 });
-                if (c.contact) setContacts([{ name: c.contact.name ?? "", email: c.contact.email ?? "", phone: c.contact.phone ?? "" }]);
+                const rawContacts = c.contacts?.length ? c.contacts : (c.contact ? [c.contact] : []);
+                if (rawContacts.length) setContacts(rawContacts.map((ct) => ({ name: ct.name ?? "", email: ct.email ?? "", phone: ct.phone ?? "" })));
             })
             .catch(() => navigate("/entreprises"))
             .finally(() => setLoading(false));
@@ -121,7 +104,10 @@ export default function EditEntreprisePage() {
                 },
                 contactPerson: contacts.filter((c) => c.name.trim()).map((c) => ({
                     name: c.name, email: c.email || undefined, phone: c.phone || undefined,
-                }))[0],
+                }))[0] ?? undefined,
+                contactPersons: contacts.filter((c) => c.name.trim()).map((c) => ({
+                    name: c.name, email: c.email || undefined, phone: c.phone || undefined,
+                })),
                 offresObservation: form.offresObservation,
                 offres3e:          form.offres3e,
             });
@@ -134,7 +120,7 @@ export default function EditEntreprisePage() {
     }
 
     const sectorOptions = [
-        { value: "", label: "Sélectionner un secteur" },
+        { value: "", label: "Aucun secteur" },
         ...sectors.map((s) => ({ value: s._id, label: s.name })),
     ];
 
@@ -193,14 +179,12 @@ export default function EditEntreprisePage() {
                 <div className={styles.fieldGroup}>
                     <p className={styles.groupLabel}>Lieu du stage</p>
                     <div className={styles.radioGroup}>
-                        <label className={styles.radio}>
-                            <input type="radio" name="locationType" value="belgique" checked={form.locationType === "belgique"} onChange={() => setForm((f) => ({ ...f, locationType: "belgique" }))} />
+                        <CustomRadio name="locationType" value="belgique" checked={form.locationType === "belgique"} onChange={() => setForm((f) => ({ ...f, locationType: "belgique" }))}>
                             Belgique
-                        </label>
-                        <label className={styles.radio}>
-                            <input type="radio" name="locationType" value="autre" checked={form.locationType === "autre"} onChange={() => setForm((f) => ({ ...f, locationType: "autre" }))} />
+                        </CustomRadio>
+                        <CustomRadio name="locationType" value="autre" checked={form.locationType === "autre"} onChange={() => setForm((f) => ({ ...f, locationType: "autre" }))}>
                             Autre pays
-                        </label>
+                        </CustomRadio>
                     </div>
                     {form.locationType === "belgique" ? (
                         <FormField label="Province" type="select" value={form.province} onChange={set("province")} options={PROVINCES} />
@@ -231,8 +215,12 @@ export default function EditEntreprisePage() {
                 ))}
 
                 <div className={styles.checkboxRow}>
-                    <label className={styles.checkbox}><input type="checkbox" checked={form.offresObservation} onChange={toggle("offresObservation")} /> Stage d'observation disponible</label>
-                    <label className={styles.checkbox}><input type="checkbox" checked={form.offres3e} onChange={toggle("offres3e")} /> Stage BAC3 disponible</label>
+                    <CustomCheckbox checked={form.offresObservation} onChange={toggle("offresObservation")}>
+                        Stage d'observation disponible
+                    </CustomCheckbox>
+                    <CustomCheckbox checked={form.offres3e} onChange={toggle("offres3e")}>
+                        Stage BAC3 disponible
+                    </CustomCheckbox>
                 </div>
 
                 <div className={styles.formFooter}>

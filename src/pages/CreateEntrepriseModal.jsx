@@ -1,36 +1,13 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useSecteurs } from "@/contexts/SecteurContext";
-import { uploadImage } from "@/api/upload";
+import { SIZES, PROVINCES } from "@/data/company";
 import Modal from "@/components/ui/Modal/Modal";
 import FormField from "@/components/ui/FormField/FormField";
+import CustomRadio from "@/components/ui/CustomRadio/CustomRadio";
+import CustomCheckbox from "@/components/ui/CustomCheckbox/CustomCheckbox";
+import LogoUploadField from "@/components/ui/LogoUploadField/LogoUploadField";
+import ContactsForm, { emptyContact } from "@/components/ui/ContactsForm/ContactsForm";
 import styles from "./CreateEntrepriseModal.module.scss";
-
-import AddIcon    from "@mui/icons-material/Add";
-import RemoveIcon from "@mui/icons-material/RemoveCircleOutlined";
-import PhotoIcon  from "@mui/icons-material/AddPhotoAlternateOutlined";
-
-const SIZES = [
-    { value: "",    label: "Sélectionner une taille" },
-    { value: "TPE", label: "TPE (< 10 employés)" },
-    { value: "PME", label: "PME (10–249 employés)" },
-    { value: "ETI", label: "ETI (250–4999 employés)" },
-    { value: "GE",  label: "Grande Entreprise (5000+)" },
-];
-
-const PROVINCES = [
-    { value: "",                label: "Sélectionner une province" },
-    { value: "Liège",           label: "Liège" },
-    { value: "Namur",           label: "Namur" },
-    { value: "Luxembourg",      label: "Luxembourg" },
-    { value: "Hainaut",         label: "Hainaut" },
-    { value: "Brabant Wallon",  label: "Brabant Wallon" },
-    { value: "Bruxelles",       label: "Bruxelles" },
-    { value: "Brabant Flamand", label: "Brabant Flamand" },
-    { value: "Anvers",          label: "Anvers" },
-    { value: "Gand",            label: "Gand" },
-];
-
-const emptyContact = () => ({ name: "", email: "", phone: "" });
 
 const empty = {
     name: "", sector: "", size: "", website: "", phone: "", description: "",
@@ -41,16 +18,14 @@ const empty = {
 
 export default function CreateEntrepriseModal({ isOpen, onClose, onSave }) {
     const { sectors } = useSecteurs();
-    const fileRef = useRef(null);
 
-    const [form,          setForm]          = useState(empty);
-    const [contacts,      setContacts]      = useState([emptyContact()]);
-    const [errors,        setErrors]        = useState({});
-    const [submitting,    setSubmitting]    = useState(false);
-    const [logoUploading, setLogoUploading] = useState(false);
+    const [form,       setForm]       = useState(empty);
+    const [contacts,   setContacts]   = useState([emptyContact()]);
+    const [errors,     setErrors]     = useState({});
+    const [submitting, setSubmitting] = useState(false);
 
     const sectorOptions = [
-        { value: "", label: "Sélectionner un secteur" },
+        { value: "", label: "Aucun secteur" },
         ...sectors.map((s) => ({ value: s._id, label: s.name })),
     ];
 
@@ -83,6 +58,10 @@ export default function CreateEntrepriseModal({ isOpen, onClose, onSave }) {
         const e = validate();
         if (Object.keys(e).length) { setErrors(e); return; }
 
+        const validContacts = contacts
+            .filter((c) => c.name.trim())
+            .map((c) => ({ name: c.name, email: c.email || undefined, phone: c.phone || undefined }));
+
         setSubmitting(true);
         try {
             await onSave?.({
@@ -100,9 +79,8 @@ export default function CreateEntrepriseModal({ isOpen, onClose, onSave }) {
                     province:   form.locationType === "belgique" ? (form.province || undefined) : undefined,
                     country:    form.locationType === "belgique" ? "Belgique" : (form.country || undefined),
                 },
-                contactPerson: contacts.filter((c) => c.name.trim()).map((c) => ({
-                    name: c.name, email: c.email || undefined, phone: c.phone || undefined,
-                }))[0],
+                contactPerson:  validContacts[0] ?? undefined,
+                contactPersons: validContacts.length > 0 ? validContacts : undefined,
                 offresObservation: form.offresObservation,
                 offres3e:          form.offres3e,
             });
@@ -185,18 +163,22 @@ export default function CreateEntrepriseModal({ isOpen, onClose, onSave }) {
                 <div className={styles.fieldGroup}>
                     <p className={styles.groupLabel}>Lieu du stage</p>
                     <div className={styles.radioGroup}>
-                        <label className={styles.radio}>
-                            <input type="radio" name="locationType" value="belgique"
-                                checked={form.locationType === "belgique"}
-                                onChange={() => setForm((f) => ({ ...f, locationType: "belgique" }))} />
+                        <CustomRadio
+                            name="locationType"
+                            value="belgique"
+                            checked={form.locationType === "belgique"}
+                            onChange={() => setForm((f) => ({ ...f, locationType: "belgique" }))}
+                        >
                             Belgique
-                        </label>
-                        <label className={styles.radio}>
-                            <input type="radio" name="locationType" value="autre"
-                                checked={form.locationType === "autre"}
-                                onChange={() => setForm((f) => ({ ...f, locationType: "autre" }))} />
+                        </CustomRadio>
+                        <CustomRadio
+                            name="locationType"
+                            value="autre"
+                            checked={form.locationType === "autre"}
+                            onChange={() => setForm((f) => ({ ...f, locationType: "autre" }))}
+                        >
                             Autre pays
-                        </label>
+                        </CustomRadio>
                     </div>
                     {form.locationType === "belgique" ? (
                         <FormField label="Province" type="select" value={form.province} onChange={set("province")} options={PROVINCES} />
@@ -227,8 +209,12 @@ export default function CreateEntrepriseModal({ isOpen, onClose, onSave }) {
                 ))}
 
                 <div className={styles.checkboxRow}>
-                    <label className={styles.checkbox}><input type="checkbox" checked={form.offresObservation} onChange={toggle("offresObservation")} /> Stage d'observation disponible</label>
-                    <label className={styles.checkbox}><input type="checkbox" checked={form.offres3e} onChange={toggle("offres3e")} /> Stage BAC3 disponible</label>
+                    <CustomCheckbox checked={form.offresObservation} onChange={toggle("offresObservation")}>
+                        Stage d'observation disponible
+                    </CustomCheckbox>
+                    <CustomCheckbox checked={form.offres3e} onChange={toggle("offres3e")}>
+                        Stage BAC3 disponible
+                    </CustomCheckbox>
                 </div>
             </form>
         </Modal>

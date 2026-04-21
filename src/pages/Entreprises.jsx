@@ -1,9 +1,10 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCompanies, createCompany, deleteCompany, giveAccess } from "@/api/companies";
 import { useSecteurs } from "@/contexts/SecteurContext";
 import SearchBar from "@/components/ui/SearchBar/SearchBar";
 import ActionButton from "@/components/ui/ActionButton/ActionButton";
+import DropdownActionMenu from "@/components/ui/DropdownActionMenu/DropdownActionMenu";
 import Toolbar from "@/components/layout/Toolbar/Toolbar";
 import DataTable from "@/components/dataTable/DataTable";
 import Tag from "@/components/ui/Tag/Tag";
@@ -17,28 +18,19 @@ import Modal from "@/components/ui/Modal/Modal";
 import SortIcon   from "@mui/icons-material/ImportExport";
 import FilterIcon from "@mui/icons-material/FilterList";
 import PlusIcon   from "@mui/icons-material/Add";
-import DomainIcon from "@mui/icons-material/Domain";
 
 import styles from "./Entreprises.module.scss";
 
-function hexToBackground(hex) {
-    const r = parseInt(hex.slice(1, 3), 16);
-    const g = parseInt(hex.slice(3, 5), 16);
-    const b = parseInt(hex.slice(5, 7), 16);
-    return `rgba(${r}, ${g}, ${b}, 0.12)`;
-}
 
 export default function Entreprises() {
     const navigate  = useNavigate();
     const { sectors } = useSecteurs();
-    const menuRef   = useRef(null);
 
     const [companies,       setCompanies]       = useState([]);
     const [loading,         setLoading]         = useState(true);
     const [selectedCompany, setSelectedCompany] = useState(null);
     const [showCreate,      setShowCreate]      = useState(false);
     const [showSecteurs,    setShowSecteurs]    = useState(false);
-    const [showMenu,        setShowMenu]        = useState(false);
     const [deleteTarget,    setDeleteTarget]    = useState(null);
     const [accessLink,      setAccessLink]      = useState(null);
     const [sortKey,         setSortKey]         = useState(null);
@@ -50,14 +42,6 @@ export default function Entreprises() {
         getCompanies()
             .then(setCompanies)
             .finally(() => setLoading(false));
-    }, []);
-
-    useEffect(() => {
-        function handleClickOutside(e) {
-            if (menuRef.current && !menuRef.current.contains(e.target)) setShowMenu(false);
-        }
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
     async function handleCreate(payload) {
@@ -141,19 +125,14 @@ export default function Entreprises() {
                         </ActionButton>
                     }
                     createButton={
-                        <div className={styles.menuWrap} ref={menuRef}>
-                            <ActionButton icon={PlusIcon} filled onClick={() => setShowMenu((v) => !v)} />
-                            {showMenu && (
-                                <div className={styles.dropMenu}>
-                                    <button onClick={() => { setShowMenu(false); setShowCreate(true); }}>
-                                        Ajouter une entreprise
-                                    </button>
-                                    <button onClick={() => { setShowMenu(false); setShowSecteurs(true); }}>
-                                        Gérer les secteurs
-                                    </button>
-                                </div>
-                            )}
-                        </div>
+                        <DropdownActionMenu
+                            icon={PlusIcon}
+                            filled
+                            items={[
+                                { label: "Ajouter une entreprise", onClick: () => setShowCreate(true) },
+                                { label: "Gérer les secteurs",     onClick: () => setShowSecteurs(true) },
+                            ]}
+                        />
                     }
                 />
                 <DataTable>
@@ -168,21 +147,15 @@ export default function Entreprises() {
                     </DataTable.Header>
                     <DataTable.Body loading={loading}>
                         {displayed.map((company) => {
-                            const sector = sectors.find((s) => s.name === company.domain);
-                            const lieu   = company.province ?? company.country ?? "—";
+                            const sectorObj = company.sector ?? sectors.find((s) => s.name === company.domain) ?? null;
+                            const lieu      = company.province ?? company.country ?? "—";
                             return (
                                 <DataTable.Row key={company.id}>
                                     <DataTable.Cell>{company.name}</DataTable.Cell>
-                                    <DataTable.Cell muted={!company.domain}>
-                                        {company.domain && sector ? (
-                                            <Tag
-                                                icon={DomainIcon}
-                                                color={sector.color}
-                                                background={hexToBackground(sector.color)}
-                                            >
-                                                {company.domain}
-                                            </Tag>
-                                        ) : (company.domain ?? "—")}
+                                    <DataTable.Cell>
+                                        <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                                            <Tag sector={sectorObj} />
+                                        </ul>
                                     </DataTable.Cell>
                                     <DataTable.Cell muted>{lieu}</DataTable.Cell>
                                     <DataTable.Cell muted>{company.contact?.name ?? "—"}</DataTable.Cell>

@@ -52,3 +52,8 @@ export async function updateMe(payload) {
 export async function deleteUser(id) {
     await client.delete(`/users/delete/${id}`);
 }
+
+export async function clearAllGroups() {
+    const { data } = await client.delete("/users/groups");
+    return data;
+}

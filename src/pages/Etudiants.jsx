@@ -1,13 +1,16 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { getUsers, updateUser, deleteUser } from "@/api/users";
+import { getUsers, updateUser, deleteUser, clearAllGroups } from "@/api/users";
 import { getGroups } from "@/api/groups";
 import SearchBar from "@/components/ui/SearchBar/SearchBar";
 import ActionButton from "@/components/ui/ActionButton/ActionButton";
+import DropdownActionMenu from "@/components/ui/DropdownActionMenu/DropdownActionMenu";
+// ActionButton gardé pour sort/filter buttons
 import Toolbar from "@/components/layout/Toolbar/Toolbar";
 import DataTable from "@/components/dataTable/DataTable";
 import Modal from "@/components/ui/Modal/Modal";
 import FormField from "@/components/ui/FormField/FormField";
+import Tag from "@/components/ui/Tag/Tag";
 import UserSheet from "@/components/sheets/UserSheet";
 import DeleteConfirm from "@/components/ui/DeleteConfirm/DeleteConfirm";
 import FilterModal from "./FilterModal";
@@ -35,21 +38,12 @@ export default function Etudiants() {
 
     const [showMessage,      setShowMessage]      = useState(false);
     const [showManageGroups, setShowManageGroups] = useState(false);
-    const [showMenu,         setShowMenu]         = useState(false);
-    const menuRef = useRef(null);
+    const [clearGroupsOpen,  setClearGroupsOpen]  = useState(false);
 
     const [sortKey,    setSortKey]    = useState(null);
     const [sortDir,    setSortDir]    = useState("asc");
     const [showFilter, setShowFilter] = useState(false);
     const [filters,    setFilters]    = useState({});
-
-    useEffect(() => {
-        function handleClickOutside(e) {
-            if (menuRef.current && !menuRef.current.contains(e.target)) setShowMenu(false);
-        }
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
 
     useEffect(() => {
         Promise.all([getUsers(), getGroups()])
@@ -123,19 +117,14 @@ export default function Etudiants() {
                         </ActionButton>
                     }
                     createButton={isManager ? (
-                        <div className={styles.menuWrap} ref={menuRef}>
-                            <ActionButton icon={AddIcon} filled onClick={() => setShowMenu((v) => !v)} />
-                            {showMenu && (
-                                <div className={styles.dropMenu}>
-                                    <button onClick={() => { setShowMenu(false); setShowMessage(true); }}>
-                                        Envoyer un message
-                                    </button>
-                                    <button onClick={() => { setShowMenu(false); setShowManageGroups(true); }}>
-                                        Gérer les groupes
-                                    </button>
-                                </div>
-                            )}
-                        </div>
+                        <DropdownActionMenu
+                            icon={AddIcon}
+                            items={[
+                                { label: "Envoyer un message",          onClick: () => setShowMessage(true) },
+                                { label: "Gérer les groupes",           onClick: () => setShowManageGroups(true) },
+                                { label: "Réinitialiser tous les groupes", onClick: () => setClearGroupsOpen(true), danger: true },
+                            ]}
+                        />
                     ) : null}
                 />
                 <DataTable>
@@ -151,7 +140,11 @@ export default function Etudiants() {
                         {displayed.map((student) => (
                             <DataTable.Row key={student.id}>
                                 <DataTable.UserCell user={student}>{student.name}</DataTable.UserCell>
-                                <DataTable.Cell muted>{student.class ?? "—"}</DataTable.Cell>
+                                <DataTable.Cell>
+                                    {student.class
+                                        ? <ul style={{ listStyle: "none", padding: 0, margin: 0 }}><Tag group={{ name: student.class, color: student.groupColor }} /></ul>
+                                        : <span style={{ color: "var(--text)" }}>—</span>}
+                                </DataTable.Cell>
                                 <DataTable.Cell muted>{student.email}</DataTable.Cell>
                                 <DataTable.Actions
                                     onView={() => setViewTarget(student)}
@@ -216,6 +209,16 @@ export default function Etudiants() {
                     setStudents((prev) => prev.filter((s) => s.id !== target.id));
                 }}
                 message={`Supprimer l'étudiant "${deleteTarget?.name}" ?`}
+            />
+            <DeleteConfirm
+                isOpen={clearGroupsOpen}
+                onClose={() => setClearGroupsOpen(false)}
+                onConfirm={async () => {
+                    setClearGroupsOpen(false);
+                    await clearAllGroups().catch(() => {});
+                    setStudents((prev) => prev.map((s) => ({ ...s, class: null, groupId: null, groupColor: null })));
+                }}
+                message="Retirer le groupe de tous les étudiants ? Cette action est irréversible."
             />
         </>
     );

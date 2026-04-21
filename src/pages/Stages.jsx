@@ -77,11 +77,11 @@ export default function Stages() {
         // Sort
         if (sortKey) {
             list.sort((a, b) => {
-                let aVal = sortKey === "student" ? a.student.name
-                         : sortKey === "company" ? a.company.name
+                let aVal = sortKey === "student" ? (a.student?.name ?? "")
+                         : sortKey === "company" ? (a.company?.name ?? "")
                          : a[sortKey] ?? "";
-                let bVal = sortKey === "student" ? b.student.name
-                         : sortKey === "company" ? b.company.name
+                let bVal = sortKey === "student" ? (b.student?.name ?? "")
+                         : sortKey === "company" ? (b.company?.name ?? "")
                          : b[sortKey] ?? "";
                 const cmp = String(aVal).localeCompare(String(bVal), "fr");
                 return sortDir === "asc" ? cmp : -cmp;
@@ -118,7 +118,7 @@ export default function Stages() {
                     <DataTable.Header sortKey={sortKey} sortDir={sortDir} onSort={handleSort}>
                         <DataTable.Row>
                             <DataTable.SortableCell column="student">Étudiant</DataTable.SortableCell>
-                            <DataTable.SortableCell column="title">Titre</DataTable.SortableCell>
+                            <DataTable.Cell>Titre</DataTable.Cell>
                             <DataTable.SortableCell column="company">Entreprise</DataTable.SortableCell>
                             <DataTable.Cell>Groupe</DataTable.Cell>
                             <DataTable.Cell>Durée</DataTable.Cell>
@@ -134,7 +134,11 @@ export default function Stages() {
                                 </DataTable.UserCell>
                                 <DataTable.Cell>{stage.title}</DataTable.Cell>
                                 <DataTable.Cell truncate>{stage.company?.name ?? "—"}</DataTable.Cell>
-                                <DataTable.Cell muted>{stage.group ?? "—"}</DataTable.Cell>
+                                <DataTable.Cell>
+                                    {stage.group
+                                        ? <ul style={{ listStyle: "none", padding: 0, margin: 0 }}><Tag group={{ name: stage.group, color: stage.groupColor }} /></ul>
+                                        : <span style={{ color: "var(--text)" }}>—</span>}
+                                </DataTable.Cell>
                                 <DataTable.Cell muted>
                                     {stage.startDate
                                         ? new Date(stage.startDate).toLocaleDateString("fr-BE", { day: "numeric", month: "short" })

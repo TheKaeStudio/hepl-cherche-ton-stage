@@ -1,6 +1,10 @@
 import client from "./client";
 
 export function normalizeCompany(c) {
+    const rawContacts = Array.isArray(c.contactPersons) && c.contactPersons.length > 0
+        ? c.contactPersons
+        : (c.contactPerson ? [c.contactPerson] : []);
+
     return {
         id:          c._id,
 
@@ -9,13 +13,15 @@ export function normalizeCompany(c) {
         domain:      c.sector?.name  ?? null,
         sectorId:    c.sector?._id   ?? null,
         sectorColor: c.sector?.color ?? null,
+        sector:      c.sector        ?? null,
         province:    c.address?.province ?? null,
         country:     c.address?.country  ?? null,
         address:     c.address ?? null,
         website:     c.website ?? null,
         phone:       c.phone ?? null,
         size:        c.size ?? null,
-        contact:     c.contactPerson ?? null,
+        contact:     rawContacts[0]  ?? null,
+        contacts:    rawContacts,
         logo:        c.logo ?? null,
         offresObservation: c.offresObservation ?? false,
         offres3e:          c.offres3e ?? false,

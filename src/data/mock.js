@@ -84,13 +84,6 @@ export const stageMessages = [
     { id: 4, stageId: 1, from: { id: 2, name: "Jacquet D.", role: "enseignant", photo: null }, body: "Pensez à noter votre rapport journalier dès le premier jour.", date: "2027-02-11T09:00:00" },
 ];
 
-export const DOMAIN_CONFIG = {
-    Informatique: { color: "#ef4444", background: "#fef2f2" },
-    Agriculture:  { color: "#22c55e", background: "#f0fdf4" },
-    Commerce:     { color: "#3b82f6", background: "#eff6ff" },
-    Industrie:    { color: "#f97316", background: "#fff7ed" },
-};
-
 export const formatDate = (iso) => {
     const d = new Date(iso);
     return d.toLocaleDateString("fr-BE", { day: "numeric", month: "long", year: "numeric" });

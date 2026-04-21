@@ -14,6 +14,7 @@ import {
 } from "@/api/internships";
 import { getCompanies } from "@/api/companies";
 import Tag from "@/components/ui/Tag/Tag";
+import CustomRadio from "@/components/ui/CustomRadio/CustomRadio";
 import styles from "./StageDetailPage.module.scss";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBackOutlined";
@@ -298,28 +299,22 @@ export default function StageDetailPage() {
                                 Type d'entreprise
                             </p>
                             <div className={styles.radioGroup}>
-                                <label>
-                                    <input
-                                        type="radio"
-                                        value="existing"
-                                        checked={
-                                            sheetForm.companyType === "existing"
-                                        }
-                                        onChange={sf("companyType")}
-                                    />
+                                <CustomRadio
+                                    name="companyType"
+                                    value="existing"
+                                    checked={sheetForm.companyType === "existing"}
+                                    onChange={sf("companyType")}
+                                >
                                     Entreprise partenaire
-                                </label>
-                                <label>
-                                    <input
-                                        type="radio"
-                                        value="external"
-                                        checked={
-                                            sheetForm.companyType === "external"
-                                        }
-                                        onChange={sf("companyType")}
-                                    />
+                                </CustomRadio>
+                                <CustomRadio
+                                    name="companyType"
+                                    value="external"
+                                    checked={sheetForm.companyType === "external"}
+                                    onChange={sf("companyType")}
+                                >
                                     Autre entreprise
-                                </label>
+                                </CustomRadio>
                             </div>
                             {sheetForm.companyType === "existing" && (
                                 <select
