@@ -4,6 +4,92 @@
     gap: 18px;
 }
 
+.fieldGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.fieldLabel {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+}
+
+.radioGroup {
+    display: flex;
+    gap: 20px;
+}
+
+.radio {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-h);
+    cursor: pointer;
+
+    input[type="radio"] { accent-color: var(--accent); cursor: pointer; }
+}
+
+.userPick {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.pickBtn {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1.5px dashed var(--border);
+    background: transparent;
+    color: var(--text);
+    font-size: 14px;
+    font-family: var(--sans);
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+
+    &:hover { border-color: var(--accent); background: var(--accent-bg); color: var(--accent); }
+}
+
+.selectedChip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1.5px solid var(--accent);
+    background: var(--accent-bg);
+
+    span {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-h);
+    }
+}
+
+.changeBtn {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: var(--sans);
+    padding: 0;
+}
+
+.fieldError {
+    font-size: 13px;
+    color: #ef4444;
+    font-weight: 500;
+}
+
 .footer {
     display: flex;
     gap: 10px;
@@ -33,10 +119,7 @@
     border: 2px solid #202020;
     color: #fff;
 
-    &:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 
 .error {

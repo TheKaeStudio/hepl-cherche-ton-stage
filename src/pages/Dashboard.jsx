@@ -31,10 +31,21 @@ export default function Dashboard() {
     const [myStages, setMyStages] = useState([]);
     const [notifications, setNotifications] = useState([]);
 
+    const isStudent = user?.role === "student";
+    const isStaff   = ["manager", "admin"].includes(user?.role);
+    const isTeacher = user?.role === "teacher";
+
     useEffect(() => {
         getCompanies().then((list) => setCompaniesCount(list.length)).catch(() => {});
         getMessages().then((msgs) => setUnreadMessages(msgs.filter((m) => !m.read).length)).catch(() => {});
-        getInternships().then(setMyStages).catch(() => {});
+        if (!isTeacher) {
+            getInternships()
+                .then((list) => {
+                    if (isStaff) setMyStages(list.filter((s) => s.status !== "completed"));
+                    else setMyStages(list);
+                })
+                .catch(() => {});
+        }
         getNotifications().then(setNotifications).catch(() => {});
     }, []);
 
@@ -69,15 +80,23 @@ export default function Dashboard() {
                 ))}
             </div>
 
-            {myStages.length > 0 && (
+            {!isTeacher && myStages.length > 0 && (
                 <div className={styles.section}>
-                    <p className={styles.sectionTitle}>Mes stages</p>
+                    <p className={styles.sectionTitle}>
+                        {isStaff ? "Stages en cours" : "Mes stages"}
+                    </p>
                     <div className={styles.stageList}>
                         {myStages.map((stage) => (
                             <div key={stage.id} className={styles.stageRow}>
                                 <div className={styles.stageInfo}>
-                                    <p className={styles.stageName}>{stage.title}</p>
-                                    <p className={styles.stageCompany}>{stage.company?.name}</p>
+                                    <p className={styles.stageName}>
+                                        {stage.title ?? stage.typeLabel ?? stage.type ?? "Stage"}
+                                    </p>
+                                    <p className={styles.stageCompany}>
+                                        {isStaff
+                                            ? (stage.student?.name ?? "—")
+                                            : (stage.company?.name ?? stage.companyName ?? "—")}
+                                    </p>
                                 </div>
                                 <ul><Tag status={stage.status} /></ul>
                             </div>

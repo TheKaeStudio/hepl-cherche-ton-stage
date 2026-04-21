@@ -1,5 +1,22 @@
 import client from "./client";
 
+const STATUS_LABELS = {
+    assigned:       "À remplir",
+    submitted:      "En attente",
+    rejected:       "Refusé",
+    validated:      "À réaliser",
+    docs_submitted: "Réalisé",
+    docs_rejected:  "À revoir",
+    completed:      "Terminé",
+    in_progress:    "En cours",
+};
+
+const TYPE_LABELS = {
+    Bachelier:   "Stage de Bachelier",
+    Master:      "Stage de Master",
+    Observation: "Stage d'observation",
+};
+
 function normalizeUser(u) {
     if (!u) return null;
     return {
@@ -7,8 +24,8 @@ function normalizeUser(u) {
         name:  `${u.firstname ?? ""} ${u.lastname ?? ""}`.trim(),
         email: u.email,
         role:  u.role,
-        class: u.promotion ?? null,
-        photo: null,
+        class: u.group?.name ?? null,
+        photo: u.photo ?? null,
     };
 }
 
@@ -17,36 +34,77 @@ function normalizeCompany(c) {
     return {
         id:       c._id,
         name:     c.name,
+        logo:     c.logo ?? null,
         contact:  c.contactPerson ?? null,
-        province: c.address?.city ?? null,
-        domain:   c.sector ?? null,
+        province: c.address?.province ?? null,
+        domain:   c.sector?.name ?? null,
         website:  c.website ?? null,
     };
 }
 
 export function normalizeInternship(i) {
-    const sheet = i.sheet ?? {};
+    const sheet          = i.sheet ?? {};
     const primaryStudent = i.students?.[0];
+    const teacher        = i.assignedTeacher;
+
+    const companyName = i.company?.name
+        ?? sheet.externalCompanyName
+        ?? null;
+
+    const companyWebsite = i.company?.website
+        ?? sheet.externalCompanyWebsite
+        ?? null;
+
+    const isLate = !!(
+        i.deadline
+        && new Date(i.deadline) < new Date()
+        && !["completed"].includes(i.status)
+    );
+
     return {
-        id:               i._id,
-        title:            i.title ?? "Stage",
-        type:             i.type ?? null,
-        group:            i.group ?? primaryStudent?.promotion ?? null,
-        student:          normalizeUser(primaryStudent),
-        students:         (i.students ?? []).map(normalizeUser),
-        company:          normalizeCompany(i.company),
-        supervisor:       i.assignedTeacher
-            ? `${i.assignedTeacher.firstname ?? ""} ${i.assignedTeacher.lastname ?? ""}`.trim()
-            : null,
-        status:           i.status,
-        deadline:         i.deadline,
-        startDate:        sheet.startDate ?? null,
-        endDate:          sheet.endDate   ?? null,
-        missions:         sheet.missions  ?? [],
-        description:      sheet.description ?? null,
-        companyTutor:     sheet.companyTutor ?? null,
-        submittedAt:      sheet.submittedAt  ?? null,
-        evaluation:       i.evaluation ?? null,
+        id:          i._id,
+        title:       i.title ?? null,
+        type:        i.type ?? null,
+        typeLabel:   TYPE_LABELS[i.type] ?? i.type ?? null,
+        schoolYear:  i.schoolYear ?? null,
+        status:      i.status,
+        statusLabel: STATUS_LABELS[i.status] ?? i.status,
+        isLate,
+        deadline:    i.deadline ?? null,
+
+        // People
+        student:     normalizeUser(primaryStudent),
+        students:    (i.students ?? []).map(normalizeUser),
+        group:       i.group?.name  ?? primaryStudent?.group?.name ?? null,
+        groupId:     i.group?._id   ?? null,
+        groupColor:  i.group?.color ?? null,
+        teacherName: teacher ? `${teacher.firstname ?? ""} ${teacher.lastname ?? ""}`.trim() : null,
+        teacherId:   teacher?._id ?? null,
+
+        // Company
+        company:             normalizeCompany(i.company),
+        companyName,
+        companyWebsite,
+        sheetCompanyType:    sheet.companyType ?? null,
+        externalCompanyName: sheet.externalCompanyName ?? null,
+
+        // Dates + supervisor
+        startDate:    sheet.startDate   ?? null,
+        endDate:      sheet.endDate     ?? null,
+        supervisor:   sheet.companyTutor ?? null,
+        missions:     sheet.missions    ?? [],
+        description:  sheet.description ?? null,
+        submittedAt:  sheet.submittedAt ?? null,
+
+        // Documents
+        conventionUrl:        i.documents?.convention        ?? null,
+        reportUrl:            i.documents?.report            ?? null,
+        docsSubmittedAt:      i.documents?.submittedAt       ?? null,
+        docsRejectionComment: i.documents?.rejectionComment  ?? null,
+
+        // Evaluation (sheet)
+        evaluation:  i.evaluation ?? null,
+
         isGroupAssignment: i.isGroupAssignment ?? false,
     };
 }
@@ -61,15 +119,14 @@ export async function getInternship(id) {
     return normalizeInternship(data.internship);
 }
 
-export async function createInternship({ students, companyId, assignedTeacher, deadline, title, type, group }) {
-    const { data } = await client.post("/internships/create", {
-        students, companyId, assignedTeacher, deadline, title, type, group,
-    });
+export async function createInternship(payload) {
+    const { data } = await client.post("/internships/create", payload);
     return normalizeInternship(data.internship);
 }
 
-export async function deleteInternship(id) {
-    await client.delete(`/internships/delete/${id}`);
+export async function updateInternship(id, payload) {
+    const { data } = await client.put(`/internships/update/${id}`, payload);
+    return normalizeInternship(data.internship);
 }
 
 export async function updateSheet(id, sheet) {
@@ -77,14 +134,30 @@ export async function updateSheet(id, sheet) {
     return normalizeInternship(data.internship);
 }
 
-export async function submitInternship(id) {
+export async function submitSheet(id) {
     const { data } = await client.post(`/internships/${id}/submit`);
     return normalizeInternship(data.internship);
 }
 
-export async function validateInternship(id, { status, grade, comment }) {
-    const { data } = await client.put(`/internships/${id}/validate`, { status, grade, comment });
+export async function validateSheet(id, { status, comment }) {
+    const { data } = await client.put(`/internships/${id}/validate`, { status, comment });
     return normalizeInternship(data.internship);
+}
+
+export async function submitDocs(id, formData) {
+    const { data } = await client.post(`/internships/${id}/submit-docs`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+    });
+    return normalizeInternship(data.internship);
+}
+
+export async function confirmDocs(id, { status, comment }) {
+    const { data } = await client.put(`/internships/${id}/confirm-docs`, { status, comment });
+    return normalizeInternship(data.internship);
+}
+
+export async function deleteInternship(id) {
+    await client.delete(`/internships/delete/${id}`);
 }
 
 // ─── Comments ─────────────────────────────────────────────────────────────────
@@ -94,7 +167,7 @@ function normalizeComment(c) {
         id:        c._id,
         content:   c.content,
         createdAt: c.createdAt,
-        author: normalizeUser(c.author),
+        author:    normalizeUser(c.author),
     };
 }
 

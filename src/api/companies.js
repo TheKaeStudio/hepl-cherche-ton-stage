@@ -6,8 +6,11 @@ export function normalizeCompany(c) {
 
         name:        c.name,
         description: c.description,
-        domain:      c.sector ?? null,
-        province:    c.address?.province ?? c.address?.city ?? null,
+        domain:      c.sector?.name  ?? null,
+        sectorId:    c.sector?._id   ?? null,
+        sectorColor: c.sector?.color ?? null,
+        province:    c.address?.province ?? null,
+        country:     c.address?.country  ?? null,
         address:     c.address ?? null,
         website:     c.website ?? null,
         phone:       c.phone ?? null,
@@ -47,4 +50,9 @@ export async function deleteCompany(id) {
 export async function giveAccess(id) {
     const { data } = await client.post(`/company/${id}/give-access`);
     return data;
+}
+
+export async function getAccessByKey(key) {
+    const { data } = await client.get(`/company/get-access/${key}`);
+    return data; // { token }
 }

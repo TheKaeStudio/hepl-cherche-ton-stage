@@ -1,27 +1,86 @@
-.form {
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-}
-
-/* Logo */
-.logoSection {
+.headerRow {
     display: flex;
     align-items: center;
     gap: 16px;
 }
 
+.backBtn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    background: var(--bg);
+    color: var(--text-h);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: var(--sans);
+    cursor: pointer;
+    transition: background 0.15s;
+
+    &:hover { background: var(--accent-bg); }
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    max-width: 760px;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+
+    @media (max-width: 560px) { grid-template-columns: 1fr; }
+}
+
+.fieldGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.groupLabel {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+}
+
+.radioGroup {
+    display: flex;
+    gap: 20px;
+}
+
+.radio {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-h);
+    cursor: pointer;
+
+    input[type="radio"] { accent-color: var(--accent); cursor: pointer; }
+}
+
+/* Logo */
+.logoSection { display: flex; }
+
 .hiddenInput { display: none; }
 
 .logoWrap {
     position: relative;
-    width: 80px;
-    height: 80px;
-    border-radius: 12px;
+    width: 96px;
+    height: 96px;
+    border-radius: 14px;
     border: 2px dashed var(--border);
     cursor: pointer;
     overflow: hidden;
-    flex-shrink: 0;
     transition: border-color 0.15s;
 
     &:hover { border-color: var(--accent); }
@@ -42,7 +101,7 @@
     justify-content: center;
     gap: 4px;
     color: var(--text);
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 600;
 }
 
@@ -54,67 +113,11 @@
     align-items: center;
     justify-content: center;
     color: #fff;
-    font-size: 11px;
-    font-weight: 700;
-}
-
-.logoHint {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.logoTitle {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-h);
-    margin: 0;
-}
-
-.logoSub {
-    font-size: 12px;
-    color: var(--text);
-    margin: 0;
-}
-
-/* Lieu du stage */
-.fieldGroup {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.radioGroup {
-    display: flex;
-    gap: 20px;
-}
-
-.radio {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--text-h);
-    cursor: pointer;
-
-    input[type="radio"] { accent-color: var(--accent); cursor: pointer; }
-}
-
-.row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-}
-
-.groupLabel {
     font-size: 12px;
     font-weight: 700;
-    color: var(--text);
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
 }
 
+/* Contacts */
 .sectionHeader {
     display: flex;
     align-items: center;
@@ -162,11 +165,11 @@
     color: #ef4444;
     cursor: pointer;
     border-radius: 6px;
-    transition: background 0.15s;
 
     &:hover { background: #fef2f2; }
 }
 
+/* Checkboxes */
 .checkboxRow {
     display: flex;
     flex-direction: column;
@@ -182,23 +185,14 @@
     color: var(--text-h);
     cursor: pointer;
 
-    input[type="checkbox"] {
-        width: 16px;
-        height: 16px;
-        cursor: pointer;
-        accent-color: var(--accent);
-    }
+    input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent); }
 }
 
-.error {
-    color: #ef4444;
-    font-size: 13px;
-    font-weight: 500;
-}
-
-.footer {
+/* Footer */
+.formFooter {
     display: flex;
     gap: 10px;
+    padding-top: 8px;
 }
 
 .cancelBtn,
@@ -225,4 +219,10 @@
     background: #202020;
     border: 2px solid #202020;
     color: #fff;
+}
+
+.error {
+    color: #ef4444;
+    font-size: 13px;
+    font-weight: 500;
 }

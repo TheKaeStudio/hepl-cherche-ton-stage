@@ -16,9 +16,13 @@ client.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
-            localStorage.removeItem("token");
-            localStorage.removeItem("user");
-            window.location.href = "/login";
+            let user = null;
+            try { user = JSON.parse(localStorage.getItem("user")); } catch { /* */ }
+            if (user?.role !== "limited") {
+                localStorage.removeItem("token");
+                localStorage.removeItem("user");
+                window.location.href = "/login";
+            }
         }
         return Promise.reject(error);
     }

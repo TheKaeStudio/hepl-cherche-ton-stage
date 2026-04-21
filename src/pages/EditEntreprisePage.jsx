@@ -1,12 +1,14 @@
-import { useState, useRef } from "react";
-import { useSecteurs } from "@/contexts/SecteurContext";
+import { useState, useEffect, useRef } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { getCompany, updateCompany } from "@/api/companies";
 import { uploadImage } from "@/api/upload";
-import Modal from "@/components/ui/Modal/Modal";
+import { useSecteurs } from "@/contexts/SecteurContext";
 import FormField from "@/components/ui/FormField/FormField";
-import styles from "./CreateEntrepriseModal.module.scss";
+import styles from "./EditEntreprisePage.module.scss";
 
 import AddIcon    from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/RemoveCircleOutlined";
+import ArrowBack  from "@mui/icons-material/ArrowBack";
 import PhotoIcon  from "@mui/icons-material/AddPhotoAlternateOutlined";
 
 const SIZES = [
@@ -18,44 +20,68 @@ const SIZES = [
 ];
 
 const PROVINCES = [
-    { value: "",                label: "Sélectionner une province" },
-    { value: "Liège",           label: "Liège" },
-    { value: "Namur",           label: "Namur" },
-    { value: "Luxembourg",      label: "Luxembourg" },
-    { value: "Hainaut",         label: "Hainaut" },
-    { value: "Brabant Wallon",  label: "Brabant Wallon" },
-    { value: "Bruxelles",       label: "Bruxelles" },
-    { value: "Brabant Flamand", label: "Brabant Flamand" },
-    { value: "Anvers",          label: "Anvers" },
-    { value: "Gand",            label: "Gand" },
+    { value: "",               label: "Sélectionner une province" },
+    { value: "Liège",          label: "Liège" },
+    { value: "Namur",          label: "Namur" },
+    { value: "Luxembourg",     label: "Luxembourg" },
+    { value: "Hainaut",        label: "Hainaut" },
+    { value: "Brabant Wallon", label: "Brabant Wallon" },
+    { value: "Bruxelles",      label: "Bruxelles" },
+    { value: "Brabant Flamand",label: "Brabant Flamand" },
+    { value: "Anvers",         label: "Anvers" },
+    { value: "Gand",           label: "Gand" },
 ];
 
 const emptyContact = () => ({ name: "", email: "", phone: "" });
 
-const empty = {
-    name: "", sector: "", size: "", website: "", phone: "", description: "",
-    street: "", city: "", postalCode: "", province: "", country: "",
-    locationType: "belgique", logo: null,
-    offresObservation: false, offres3e: false,
-};
-
-export default function CreateEntrepriseModal({ isOpen, onClose, onSave }) {
+export default function EditEntreprisePage() {
+    const { id }   = useParams();
+    const navigate = useNavigate();
     const { sectors } = useSecteurs();
     const fileRef = useRef(null);
 
-    const [form,          setForm]          = useState(empty);
-    const [contacts,      setContacts]      = useState([emptyContact()]);
-    const [errors,        setErrors]        = useState({});
-    const [submitting,    setSubmitting]    = useState(false);
+    const [loading,       setLoading]       = useState(true);
+    const [submitting,    setSubmitting]     = useState(false);
     const [logoUploading, setLogoUploading] = useState(false);
+    const [errors,        setErrors]        = useState({});
 
-    const sectorOptions = [
-        { value: "", label: "Sélectionner un secteur" },
-        ...sectors.map((s) => ({ value: s._id, label: s.name })),
-    ];
+    const [form, setForm] = useState({
+        name: "", sector: "", size: "", website: "", phone: "", description: "",
+        street: "", city: "", postalCode: "", province: "", country: "",
+        locationType: "belgique", logo: null,
+        offresObservation: false, offres3e: false,
+    });
+    const [contacts, setContacts] = useState([emptyContact()]);
 
-    const set    = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
-    const toggle = (key) => ()  => setForm((f) => ({ ...f, [key]: !f[key] }));
+    useEffect(() => {
+        getCompany(id)
+            .then((c) => {
+                const hasProvince = !!c.address?.province;
+                setForm({
+                    name:        c.name ?? "",
+                    sector:      c.sectorId ?? "",
+                    size:        c.size ?? "",
+                    website:     c.website ?? "",
+                    phone:       c.phone ?? "",
+                    description: c.description ?? "",
+                    street:      c.address?.street ?? "",
+                    city:        c.address?.city ?? "",
+                    postalCode:  c.address?.postalCode ?? "",
+                    province:    c.address?.province ?? "",
+                    country:     c.address?.country ?? "",
+                    locationType: hasProvince ? "belgique" : "autre",
+                    logo:        c.logo ?? null,
+                    offresObservation: c.offresObservation ?? false,
+                    offres3e:    c.offres3e ?? false,
+                });
+                if (c.contact) setContacts([{ name: c.contact.name ?? "", email: c.contact.email ?? "", phone: c.contact.phone ?? "" }]);
+            })
+            .catch(() => navigate("/entreprises"))
+            .finally(() => setLoading(false));
+    }, [id, navigate]);
+
+    const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
+    const toggle = (key) => () => setForm((f) => ({ ...f, [key]: !f[key] }));
 
     async function handleLogoChange(e) {
         const file = e.target.files?.[0];
@@ -72,30 +98,23 @@ export default function CreateEntrepriseModal({ isOpen, onClose, onSave }) {
         setContacts((prev) => prev.map((c, idx) => idx === i ? { ...c, [key]: value } : c));
     }
 
-    function validate() {
-        const e = {};
-        if (!form.name.trim()) e.name = "Le nom est requis.";
-        return e;
-    }
-
-    async function handleSubmit(ev) {
-        ev.preventDefault();
-        const e = validate();
-        if (Object.keys(e).length) { setErrors(e); return; }
-
+    async function handleSubmit(e) {
+        e.preventDefault();
+        if (!form.name.trim()) { setErrors({ name: "Le nom est requis." }); return; }
         setSubmitting(true);
+        setErrors({});
         try {
-            await onSave?.({
+            await updateCompany(id, {
                 name:        form.name,
                 description: form.description || undefined,
                 sector:      form.sector || undefined,
-                size:        form.size   || undefined,
+                size:        form.size || undefined,
                 website:     form.website || undefined,
-                phone:       form.phone  || undefined,
-                logo:        form.logo   || undefined,
+                phone:       form.phone || undefined,
+                logo:        form.logo || undefined,
                 address: {
-                    street:     form.street     || undefined,
-                    city:       form.city       || undefined,
+                    street:     form.street || undefined,
+                    city:       form.city || undefined,
                     postalCode: form.postalCode || undefined,
                     province:   form.locationType === "belgique" ? (form.province || undefined) : undefined,
                     country:    form.locationType === "belgique" ? "Belgique" : (form.country || undefined),
@@ -106,10 +125,7 @@ export default function CreateEntrepriseModal({ isOpen, onClose, onSave }) {
                 offresObservation: form.offresObservation,
                 offres3e:          form.offres3e,
             });
-            setForm(empty);
-            setContacts([emptyContact()]);
-            setErrors({});
-            onClose();
+            navigate("/entreprises");
         } catch (err) {
             setErrors({ global: err.response?.data?.error ?? "Une erreur est survenue." });
         } finally {
@@ -117,29 +133,25 @@ export default function CreateEntrepriseModal({ isOpen, onClose, onSave }) {
         }
     }
 
-    function handleClose() {
-        setForm(empty);
-        setContacts([emptyContact()]);
-        setErrors({});
-        onClose();
-    }
+    const sectorOptions = [
+        { value: "", label: "Sélectionner un secteur" },
+        ...sectors.map((s) => ({ value: s._id, label: s.name })),
+    ];
+
+    if (loading) return <section><p style={{ padding: "40px", color: "var(--text)" }}>Chargement…</p></section>;
 
     return (
-        <Modal
-            isOpen={isOpen}
-            onClose={handleClose}
-            title="Ajouter une entreprise"
-            size="lg"
-            footer={
-                <div className={styles.footer}>
-                    <button className={styles.cancelBtn} onClick={handleClose} type="button">Annuler</button>
-                    <button className={styles.saveBtn} form="createEntrepriseForm" type="submit" disabled={submitting}>
-                        {submitting ? "Enregistrement…" : "Enregistrer"}
+        <section>
+            <div className="sectionHeader">
+                <div className={styles.headerRow}>
+                    <button className={styles.backBtn} onClick={() => navigate(-1)} type="button">
+                        <ArrowBack fontSize="small" /> Retour
                     </button>
+                    <h2>Modifier l'entreprise</h2>
                 </div>
-            }
-        >
-            <form id="createEntrepriseForm" onSubmit={handleSubmit} className={styles.form}>
+            </div>
+
+            <form onSubmit={handleSubmit} className={styles.form}>
                 {errors.global && <p className={styles.error}>{errors.global}</p>}
 
                 {/* Logo */}
@@ -155,10 +167,6 @@ export default function CreateEntrepriseModal({ isOpen, onClose, onSave }) {
                             </div>
                         )}
                         {logoUploading && <div className={styles.logoOverlay}>Envoi…</div>}
-                    </div>
-                    <div className={styles.logoHint}>
-                        <p className={styles.logoTitle}>Logo de l'entreprise</p>
-                        <p className={styles.logoSub}>Cliquez pour uploader une image (max 5 Mo)</p>
                     </div>
                 </div>
 
@@ -186,15 +194,11 @@ export default function CreateEntrepriseModal({ isOpen, onClose, onSave }) {
                     <p className={styles.groupLabel}>Lieu du stage</p>
                     <div className={styles.radioGroup}>
                         <label className={styles.radio}>
-                            <input type="radio" name="locationType" value="belgique"
-                                checked={form.locationType === "belgique"}
-                                onChange={() => setForm((f) => ({ ...f, locationType: "belgique" }))} />
+                            <input type="radio" name="locationType" value="belgique" checked={form.locationType === "belgique"} onChange={() => setForm((f) => ({ ...f, locationType: "belgique" }))} />
                             Belgique
                         </label>
                         <label className={styles.radio}>
-                            <input type="radio" name="locationType" value="autre"
-                                checked={form.locationType === "autre"}
-                                onChange={() => setForm((f) => ({ ...f, locationType: "autre" }))} />
+                            <input type="radio" name="locationType" value="autre" checked={form.locationType === "autre"} onChange={() => setForm((f) => ({ ...f, locationType: "autre" }))} />
                             Autre pays
                         </label>
                     </div>
@@ -230,7 +234,12 @@ export default function CreateEntrepriseModal({ isOpen, onClose, onSave }) {
                     <label className={styles.checkbox}><input type="checkbox" checked={form.offresObservation} onChange={toggle("offresObservation")} /> Stage d'observation disponible</label>
                     <label className={styles.checkbox}><input type="checkbox" checked={form.offres3e} onChange={toggle("offres3e")} /> Stage BAC3 disponible</label>
                 </div>
+
+                <div className={styles.formFooter}>
+                    <button type="button" className={styles.cancelBtn} onClick={() => navigate(-1)}>Annuler</button>
+                    <button type="submit" className={styles.saveBtn} disabled={submitting}>{submitting ? "Enregistrement…" : "Enregistrer"}</button>
+                </div>
             </form>
-        </Modal>
+        </section>
     );
 }

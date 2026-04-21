@@ -1,11 +1,12 @@
 import { useState, useMemo, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { getInternships, deleteInternship } from "@/api/internships";
+import { getGroups } from "@/api/groups";
 import SearchBar from "@/components/ui/SearchBar/SearchBar";
 import ActionButton from "@/components/ui/ActionButton/ActionButton";
 import Toolbar from "@/components/layout/Toolbar/Toolbar";
 import DataTable from "@/components/dataTable/DataTable";
 import Tag from "@/components/ui/Tag/Tag";
-import StageSheet from "@/components/sheets/StageSheet";
 import DeleteConfirm from "@/components/ui/DeleteConfirm/DeleteConfirm";
 import FilterModal from "./FilterModal";
 import CreateStageModal from "./CreateStageModal";
@@ -14,34 +15,21 @@ import SortIcon from "@mui/icons-material/ImportExport";
 import FilterIcon from "@mui/icons-material/FilterList";
 import PlusIcon from "@mui/icons-material/Add";
 
-const FILTER_CONFIG = [
-    {
-        key: "status",
-        label: "Statut",
-        options: [
-            { value: "assigned",    label: "Assigné"    },
-            { value: "in_progress", label: "En cours"   },
-            { value: "submitted",   label: "Soumis"     },
-            { value: "validated",   label: "Validé"     },
-            { value: "rejected",    label: "Rejeté"     },
-        ],
-    },
-    {
-        key: "group",
-        label: "Groupe",
-        options: [
-            { value: "D301", label: "D301" },
-            { value: "D302", label: "D302" },
-            { value: "D201", label: "D201" },
-            { value: "D202", label: "D202" },
-        ],
-    },
+const STATUS_OPTIONS = [
+    { value: "assigned",       label: "À remplir"  },
+    { value: "submitted",      label: "En attente" },
+    { value: "rejected",       label: "Refusé"     },
+    { value: "validated",      label: "À réaliser" },
+    { value: "docs_submitted", label: "Réalisé"    },
+    { value: "docs_rejected",  label: "À revoir"   },
+    { value: "completed",      label: "Terminé"    },
 ];
 
 export default function Stages() {
+    const navigate = useNavigate();
     const [stages, setStages] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [selectedStage, setSelectedStage] = useState(null);
+    const [groups,  setGroups]  = useState([]);
     const [deleteTarget, setDeleteTarget] = useState(null);
     const [showCreate, setShowCreate] = useState(false);
     const [sortKey, setSortKey] = useState(null);
@@ -50,8 +38,8 @@ export default function Stages() {
     const [filters, setFilters] = useState({});
 
     useEffect(() => {
-        getInternships()
-            .then(setStages)
+        Promise.all([getInternships(), getGroups()])
+            .then(([list, groupList]) => { setStages(list); setGroups(groupList); })
             .finally(() => setLoading(false));
     }, []);
 
@@ -75,16 +63,16 @@ export default function Stages() {
         }
     }
 
+    const FILTER_CONFIG = useMemo(() => [
+        { key: "status", label: "Statut", options: STATUS_OPTIONS },
+        { key: "group",  label: "Groupe", options: groups.map((g) => ({ value: g.name, label: g.name })) },
+    ], [groups]);
+
     const displayed = useMemo(() => {
         let list = [...stages];
 
-        // Filter
-        if (filters.status?.length) {
-            list = list.filter((s) => filters.status.includes(s.status));
-        }
-        if (filters.group?.length) {
-            list = list.filter((s) => filters.group.includes(s.group));
-        }
+        if (filters.status?.length) list = list.filter((s) => filters.status.includes(s.status));
+        if (filters.group?.length)  list = list.filter((s) => filters.group.includes(s.group));
 
         // Sort
         if (sortKey) {
@@ -160,7 +148,7 @@ export default function Stages() {
                                     <Tag status={stage.status} />
                                 </DataTable.Cell>
                                 <DataTable.Actions
-                                    onView={() => setSelectedStage(stage)}
+                                    onView={() => navigate(`/stages/${stage.id}`)}
                                     onDelete={() => setDeleteTarget(stage)}
                                 />
                             </DataTable.Row>
@@ -170,7 +158,6 @@ export default function Stages() {
             </section>
 
             <CreateStageModal isOpen={showCreate} onClose={() => setShowCreate(false)} onSave={handleCreate} />
-            <StageSheet stage={selectedStage} onClose={() => setSelectedStage(null)} />
             <FilterModal
                 isOpen={showFilter}
                 onClose={() => setShowFilter(false)}

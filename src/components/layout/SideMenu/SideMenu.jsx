@@ -19,6 +19,7 @@ import GroupIcon from "@mui/icons-material/Group";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
+import EditIcon from "@mui/icons-material/EditOutlined";
 
 export default function SideMenu() {
     const [unreadCount, setUnreadCount] = useState(0);
@@ -45,6 +46,7 @@ export default function SideMenu() {
     const isManager  = role === "manager";
     const isAdmin    = role === "admin";
     const isStaff    = isTeacher || isManager || isAdmin;
+    const isLimited  = role === "limited";
 
     return (
         <>
@@ -64,13 +66,22 @@ export default function SideMenu() {
 
                 <nav>
                     <div>
-                        {/* Commun à tous */}
+                        {/* Accès limité entreprise */}
+                        {isLimited && (
+                            <NavLink href={`/entreprises/${user?.companyId}/modifier`} icon={EditIcon}>
+                                Modifier mon entreprise
+                            </NavLink>
+                        )}
+
+                        {/* Commun à tous sauf limited */}
+                        {!isLimited && (
                         <NavLink href="/" icon={DashboardIcon}>
                             Tableau de bord
                         </NavLink>
+                        )}
 
                         {/* Section étudiant */}
-                        {isStudent && (
+                        {!isLimited && isStudent && (
                             <div>
                                 <span className={styles.sectionLabel}>Mon stage</span>
                                 <NavLink href="/mon-stage" icon={MenuBookIcon}>
@@ -89,7 +100,7 @@ export default function SideMenu() {
                         )}
 
                         {/* Section staff (prof / manager / admin) */}
-                        {isStaff && (
+                        {!isLimited && isStaff && (
                             <div>
                                 <span className={styles.sectionLabel}>Navigation</span>
                                 <NavLink href="/recherche" icon={SearchIcon}>
@@ -105,7 +116,7 @@ export default function SideMenu() {
                         )}
 
                         {/* Section gestion (prof / manager / admin) */}
-                        {isStaff && (
+                        {!isLimited && isStaff && (
                             <div>
                                 <span className={styles.sectionLabel}>Gestion</span>
                                 <NavLink href="/stages" icon={AssignmentIcon}>
@@ -118,7 +129,7 @@ export default function SideMenu() {
                         )}
 
                         {/* Section administration (manager / admin) */}
-                        {(isManager || isAdmin) && (
+                        {!isLimited && (isManager || isAdmin) && (
                             <div>
                                 <span className={styles.sectionLabel}>Administration</span>
                                 <NavLink href="/entreprises" icon={DomainIcon}>

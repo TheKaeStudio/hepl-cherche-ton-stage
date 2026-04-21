@@ -1,7 +1,7 @@
-import { useState, useMemo, useEffect } from "react";
-import { DOMAIN_CONFIG } from "@/data/mock";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { getCompanies, createCompany, deleteCompany, giveAccess } from "@/api/companies";
-import Modal from "@/components/ui/Modal/Modal";
+import { useSecteurs } from "@/contexts/SecteurContext";
 import SearchBar from "@/components/ui/SearchBar/SearchBar";
 import ActionButton from "@/components/ui/ActionButton/ActionButton";
 import Toolbar from "@/components/layout/Toolbar/Toolbar";
@@ -9,58 +9,42 @@ import DataTable from "@/components/dataTable/DataTable";
 import Tag from "@/components/ui/Tag/Tag";
 import EntrepriseSheet from "@/components/sheets/EntrepriseSheet";
 import CreateEntrepriseModal from "./CreateEntrepriseModal";
+import GestionSecteursModal from "./GestionSecteursModal";
 import DeleteConfirm from "@/components/ui/DeleteConfirm/DeleteConfirm";
 import FilterModal from "./FilterModal";
+import Modal from "@/components/ui/Modal/Modal";
 
-import SortIcon from "@mui/icons-material/ImportExport";
+import SortIcon   from "@mui/icons-material/ImportExport";
 import FilterIcon from "@mui/icons-material/FilterList";
-import PlusIcon from "@mui/icons-material/Add";
-import DevicesIcon from "@mui/icons-material/Devices";
-import AgricultureIcon from "@mui/icons-material/Agriculture";
-import StoreIcon from "@mui/icons-material/Storefront";
-import FactoryIcon from "@mui/icons-material/Factory";
+import PlusIcon   from "@mui/icons-material/Add";
 import DomainIcon from "@mui/icons-material/Domain";
 
-const DOMAIN_ICONS = {
-    Informatique: DevicesIcon,
-    Agriculture: AgricultureIcon,
-    Commerce: StoreIcon,
-    Industrie: FactoryIcon,
-};
+import styles from "./Entreprises.module.scss";
 
-const FILTER_CONFIG = [
-    {
-        key: "domain",
-        label: "Domaine",
-        options: [
-            { value: "Informatique", label: "Informatique" },
-            { value: "Agriculture", label: "Agriculture" },
-            { value: "Commerce", label: "Commerce" },
-            { value: "Industrie", label: "Industrie" },
-        ],
-    },
-    {
-        key: "province",
-        label: "Province",
-        options: [
-            { value: "Liège", label: "Liège" },
-            { value: "Namur", label: "Namur" },
-            { value: "Hainaut", label: "Hainaut" },
-        ],
-    },
-];
+function hexToBackground(hex) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, 0.12)`;
+}
 
 export default function Entreprises() {
-    const [companies, setCompanies] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const navigate  = useNavigate();
+    const { sectors } = useSecteurs();
+    const menuRef   = useRef(null);
+
+    const [companies,       setCompanies]       = useState([]);
+    const [loading,         setLoading]         = useState(true);
     const [selectedCompany, setSelectedCompany] = useState(null);
-    const [showCreate, setShowCreate] = useState(false);
-    const [deleteTarget, setDeleteTarget] = useState(null);
-    const [accessLink, setAccessLink] = useState(null);
-    const [sortKey, setSortKey] = useState(null);
-    const [sortDir, setSortDir] = useState("asc");
-    const [showFilter, setShowFilter] = useState(false);
-    const [filters, setFilters] = useState({});
+    const [showCreate,      setShowCreate]      = useState(false);
+    const [showSecteurs,    setShowSecteurs]    = useState(false);
+    const [showMenu,        setShowMenu]        = useState(false);
+    const [deleteTarget,    setDeleteTarget]    = useState(null);
+    const [accessLink,      setAccessLink]      = useState(null);
+    const [sortKey,         setSortKey]         = useState(null);
+    const [sortDir,         setSortDir]         = useState("asc");
+    const [showFilter,      setShowFilter]      = useState(false);
+    const [filters,         setFilters]         = useState({});
 
     useEffect(() => {
         getCompanies()
@@ -68,9 +52,18 @@ export default function Entreprises() {
             .finally(() => setLoading(false));
     }, []);
 
+    useEffect(() => {
+        function handleClickOutside(e) {
+            if (menuRef.current && !menuRef.current.contains(e.target)) setShowMenu(false);
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
     async function handleCreate(payload) {
         const created = await createCompany(payload);
         setCompanies((prev) => [created, ...prev]);
+        setShowCreate(false);
     }
 
     async function handleDelete() {
@@ -84,44 +77,45 @@ export default function Entreprises() {
     async function handleGiveAccess(company) {
         try {
             const result = await giveAccess(company.id);
-            const key = result?.key;
-            const link = key
-                ? `${window.location.origin}/company/acces?key=${key}`
-                : null;
-            setAccessLink({ company, link });
+            const key    = result?.key;
+            setAccessLink({ company, link: key ? `${window.location.origin}/company/acces?key=${key}` : null });
         } catch {
             setAccessLink({ company, link: null, error: true });
         }
     }
 
     function handleSort(key) {
-        if (sortKey === key) {
-            setSortDir((d) => (d === "asc" ? "desc" : "asc"));
-        } else {
-            setSortKey(key);
-            setSortDir("asc");
-        }
+        if (sortKey === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+        else { setSortKey(key); setSortDir("asc"); }
     }
+
+    const FILTER_CONFIG = useMemo(() => [
+        {
+            key: "domain",
+            label: "Secteur",
+            options: sectors.map((s) => ({ value: s.name, label: s.name })),
+        },
+        {
+            key: "province",
+            label: "Lieu",
+            options: [
+                { value: "Liège",   label: "Liège" },
+                { value: "Namur",   label: "Namur" },
+                { value: "Hainaut", label: "Hainaut" },
+            ],
+        },
+    ], [sectors]);
 
     const displayed = useMemo(() => {
         let list = [...companies];
-
-        if (filters.domain?.length) {
-            list = list.filter((c) => filters.domain.includes(c.domain));
-        }
-        if (filters.province?.length) {
-            list = list.filter((c) => filters.province.includes(c.province));
-        }
-
+        if (filters.domain?.length)   list = list.filter((c) => filters.domain.includes(c.domain));
+        if (filters.province?.length) list = list.filter((c) => filters.province.includes(c.province));
         if (sortKey) {
             list.sort((a, b) => {
-                const aVal = a[sortKey] ?? "";
-                const bVal = b[sortKey] ?? "";
-                const cmp = String(aVal).localeCompare(String(bVal), "fr");
+                const cmp = String(a[sortKey] ?? "").localeCompare(String(b[sortKey] ?? ""), "fr");
                 return sortDir === "asc" ? cmp : -cmp;
             });
         }
-
         return list;
     }, [companies, sortKey, sortDir, filters]);
 
@@ -135,7 +129,7 @@ export default function Entreprises() {
                     <p>Gérez les entreprises partenaires et leurs offres de stage.</p>
                 </div>
                 <Toolbar
-                    searchBar={<SearchBar placeholder="Rechercher une entreprise..." />}
+                    searchBar={<SearchBar placeholder="Rechercher une entreprise…" />}
                     sortButton={
                         <ActionButton icon={SortIcon}>
                             {sortKey ? `Trié par ${sortKey}` : "Les plus récents"}
@@ -147,43 +141,54 @@ export default function Entreprises() {
                         </ActionButton>
                     }
                     createButton={
-                        <ActionButton icon={PlusIcon} filled onClick={() => setShowCreate(true)}>
-                            Ajouter une entreprise
-                        </ActionButton>
+                        <div className={styles.menuWrap} ref={menuRef}>
+                            <ActionButton icon={PlusIcon} filled onClick={() => setShowMenu((v) => !v)} />
+                            {showMenu && (
+                                <div className={styles.dropMenu}>
+                                    <button onClick={() => { setShowMenu(false); setShowCreate(true); }}>
+                                        Ajouter une entreprise
+                                    </button>
+                                    <button onClick={() => { setShowMenu(false); setShowSecteurs(true); }}>
+                                        Gérer les secteurs
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     }
                 />
                 <DataTable>
                     <DataTable.Header sortKey={sortKey} sortDir={sortDir} onSort={handleSort}>
                         <DataTable.Row>
                             <DataTable.SortableCell column="name">Entreprise</DataTable.SortableCell>
-                            <DataTable.SortableCell column="domain">Domaine</DataTable.SortableCell>
-                            <DataTable.SortableCell column="province">Province</DataTable.SortableCell>
+                            <DataTable.SortableCell column="domain">Secteur</DataTable.SortableCell>
+                            <DataTable.Cell>Lieu</DataTable.Cell>
                             <DataTable.Cell>Contact</DataTable.Cell>
                             <DataTable.Cell end>Actions</DataTable.Cell>
                         </DataTable.Row>
                     </DataTable.Header>
                     <DataTable.Body loading={loading}>
                         {displayed.map((company) => {
-                            const domainCfg = DOMAIN_CONFIG[company.domain];
-                            const DomainIconComp = DOMAIN_ICONS[company.domain] ?? DomainIcon;
+                            const sector = sectors.find((s) => s.name === company.domain);
+                            const lieu   = company.province ?? company.country ?? "—";
                             return (
                                 <DataTable.Row key={company.id}>
                                     <DataTable.Cell>{company.name}</DataTable.Cell>
                                     <DataTable.Cell muted={!company.domain}>
-                                        {company.domain ? (
+                                        {company.domain && sector ? (
                                             <Tag
-                                                icon={DomainIconComp}
-                                                color={domainCfg?.color}
-                                                background={domainCfg?.background}
+                                                icon={DomainIcon}
+                                                color={sector.color}
+                                                background={hexToBackground(sector.color)}
                                             >
                                                 {company.domain}
                                             </Tag>
-                                        ) : "—"}
+                                        ) : (company.domain ?? "—")}
                                     </DataTable.Cell>
-                                    <DataTable.Cell muted>{company.province ?? "—"}</DataTable.Cell>
+                                    <DataTable.Cell muted>{lieu}</DataTable.Cell>
                                     <DataTable.Cell muted>{company.contact?.name ?? "—"}</DataTable.Cell>
                                     <DataTable.Actions
                                         onView={() => setSelectedCompany(company)}
+                                        onEdit={() => navigate(`/entreprises/${company.id}/modifier`)}
                                         onGiveAccess={() => handleGiveAccess(company)}
                                         onDelete={() => setDeleteTarget(company)}
                                     />
@@ -196,6 +201,7 @@ export default function Entreprises() {
 
             <EntrepriseSheet company={selectedCompany} onClose={() => setSelectedCompany(null)} />
             <CreateEntrepriseModal isOpen={showCreate} onClose={() => setShowCreate(false)} onSave={handleCreate} />
+            <GestionSecteursModal  isOpen={showSecteurs} onClose={() => setShowSecteurs(false)} />
             <FilterModal
                 isOpen={showFilter}
                 onClose={() => setShowFilter(false)}
@@ -209,47 +215,23 @@ export default function Entreprises() {
                 onConfirm={handleDelete}
                 message={`Supprimer l'entreprise "${deleteTarget?.name}" ?`}
             />
-            <Modal
-                isOpen={!!accessLink}
-                onClose={() => setAccessLink(null)}
-                title={`Accès — ${accessLink?.company?.name ?? ""}`}
-                size="sm"
-            >
+            <Modal isOpen={!!accessLink} onClose={() => setAccessLink(null)} title={`Accès — ${accessLink?.company?.name ?? ""}`} size="sm">
                 {accessLink?.error ? (
-                    <p style={{ color: "#ef4444", fontSize: "14px" }}>
-                        Erreur lors de la génération du lien.
-                    </p>
+                    <p style={{ color: "#ef4444", fontSize: "14px" }}>Erreur lors de la génération du lien.</p>
                 ) : accessLink?.link ? (
                     <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                         <p style={{ fontSize: "13px", color: "var(--text)" }}>
                             Partagez ce lien avec l'entreprise pour qu'elle puisse modifier sa fiche :
                         </p>
                         <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                            <input
-                                readOnly
-                                value={accessLink.link}
-                                style={{
-                                    flex: 1, padding: "10px 12px", borderRadius: "10px",
-                                    border: "2px solid var(--border)", background: "var(--bg-alt)",
-                                    fontSize: "13px", color: "var(--text-h)", fontFamily: "monospace",
-                                }}
-                            />
-                            <button
-                                onClick={() => navigator.clipboard.writeText(accessLink.link)}
-                                style={{
-                                    padding: "10px 16px", borderRadius: "10px", border: "2px solid var(--border)",
-                                    background: "var(--bg)", cursor: "pointer", fontSize: "13px", fontWeight: 700,
-                                    color: "var(--text-h)", fontFamily: "var(--sans)",
-                                }}
-                            >
+                            <input readOnly value={accessLink.link} style={{ flex: 1, padding: "10px 12px", borderRadius: "10px", border: "2px solid var(--border)", background: "var(--bg-alt, var(--bg))", fontSize: "13px", color: "var(--text-h)", fontFamily: "monospace" }} />
+                            <button onClick={() => navigator.clipboard.writeText(accessLink.link)} style={{ padding: "10px 16px", borderRadius: "10px", border: "2px solid var(--border)", background: "var(--bg)", cursor: "pointer", fontSize: "13px", fontWeight: 700, color: "var(--text-h)", fontFamily: "var(--sans)" }}>
                                 Copier
                             </button>
                         </div>
                     </div>
                 ) : (
-                    <p style={{ fontSize: "14px", color: "var(--text)" }}>
-                        Lien généré, mais format inconnu. Vérifiez la réponse API.
-                    </p>
+                    <p style={{ fontSize: "14px", color: "var(--text)" }}>Lien généré, mais format inconnu.</p>
                 )}
             </Modal>
         </>

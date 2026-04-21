@@ -12,6 +12,7 @@ import UserSheet from "@/components/sheets/UserSheet";
 import DeleteConfirm from "@/components/ui/DeleteConfirm/DeleteConfirm";
 import FilterModal from "./FilterModal";
 import SendMessageModal from "./SendMessageModal";
+import GestionGroupesModal from "./GestionGroupesModal";
 import styles from "./Etudiants.module.scss";
 
 import SortIcon from "@mui/icons-material/ImportExport";
@@ -32,10 +33,9 @@ export default function Etudiants() {
     const [editGroup,    setEditGroup]    = useState("");
     const [editSaving,   setEditSaving]   = useState(false);
 
-    const [showMessage,     setShowMessage]     = useState(false);
-    const [showMenu,        setShowMenu]        = useState(false);
-    const [showCreateGroup, setShowCreateGroup] = useState(false);
-    const [newGroupName,    setNewGroupName]    = useState("");
+    const [showMessage,      setShowMessage]      = useState(false);
+    const [showManageGroups, setShowManageGroups] = useState(false);
+    const [showMenu,         setShowMenu]         = useState(false);
     const menuRef = useRef(null);
 
     const [sortKey,    setSortKey]    = useState(null);
@@ -52,13 +52,10 @@ export default function Etudiants() {
     }, []);
 
     useEffect(() => {
-        getUsers()
-            .then((list) => {
-                const studs = list.filter((u) => u.role === "etudiant");
-                setStudents(studs);
-                const seen = new Set();
-                studs.forEach((s) => { if (s.class) seen.add(s.class); });
-                setGroups([...seen].sort());
+        Promise.all([getUsers(), getGroups()])
+            .then(([list, groupList]) => {
+                setStudents(list.filter((u) => u.role === "etudiant"));
+                setGroups(groupList);
             })
             .finally(() => setLoading(false));
     }, []);
@@ -68,23 +65,12 @@ export default function Etudiants() {
         else { setSortKey(key); setSortDir("asc"); }
     }
 
-    function handleCreateGroup() {
-        const name = newGroupName.trim().toUpperCase();
-        if (!name || groups.includes(name)) return;
-        setGroups((prev) => [...prev, name].sort());
-        setNewGroupName("");
-        setShowCreateGroup(false);
-    }
-
     async function handleSaveGroup() {
         if (!editTarget) return;
         setEditSaving(true);
         try {
-            const updated = await updateUser(editTarget.id, { promotion: editGroup || null });
+            const updated = await updateUser(editTarget.id, { group: editGroup || null });
             setStudents((prev) => prev.map((s) => s.id === updated.id ? updated : s));
-            if (editGroup && !groups.includes(editGroup)) {
-                setGroups((prev) => [...prev, editGroup].sort());
-            }
             setEditTarget(null);
         } finally {
             setEditSaving(false);
@@ -95,13 +81,13 @@ export default function Etudiants() {
         {
             key: "class",
             label: "Groupe",
-            options: groups.map((g) => ({ value: g, label: g })),
+            options: groups.map((g) => ({ value: g.name, label: g.name })),
         },
     ], [groups]);
 
     const groupOptions = useMemo(() => [
         { value: "", label: "Aucun groupe" },
-        ...groups.map((g) => ({ value: g, label: g })),
+        ...groups.map((g) => ({ value: g._id, label: g.name })),
     ], [groups]);
 
     const displayed = useMemo(() => {
@@ -138,16 +124,14 @@ export default function Etudiants() {
                     }
                     createButton={isManager ? (
                         <div className={styles.menuWrap} ref={menuRef}>
-                            <button className={styles.addBtn} onClick={() => setShowMenu((v) => !v)}>
-                                <AddIcon fontSize="small" />
-                            </button>
+                            <ActionButton icon={AddIcon} filled onClick={() => setShowMenu((v) => !v)} />
                             {showMenu && (
                                 <div className={styles.dropMenu}>
                                     <button onClick={() => { setShowMenu(false); setShowMessage(true); }}>
                                         Envoyer un message
                                     </button>
-                                    <button onClick={() => { setShowMenu(false); setShowCreateGroup(true); }}>
-                                        Créer un groupe
+                                    <button onClick={() => { setShowMenu(false); setShowManageGroups(true); }}>
+                                        Gérer les groupes
                                     </button>
                                 </div>
                             )}
@@ -171,7 +155,7 @@ export default function Etudiants() {
                                 <DataTable.Cell muted>{student.email}</DataTable.Cell>
                                 <DataTable.Actions
                                     onView={() => setViewTarget(student)}
-                                    onEdit={isManager ? () => { setEditTarget(student); setEditGroup(student.class ?? ""); } : undefined}
+                                    onEdit={isManager ? () => { setEditTarget(student); setEditGroup(student.groupId ?? ""); } : undefined}
                                     onDelete={isManager ? () => setDeleteTarget(student) : undefined}
                                 />
                             </DataTable.Row>
@@ -182,6 +166,13 @@ export default function Etudiants() {
 
             <UserSheet user={viewTarget} onClose={() => setViewTarget(null)} />
             <SendMessageModal isOpen={showMessage} onClose={() => setShowMessage(false)} />
+            <GestionGroupesModal
+                isOpen={showManageGroups}
+                onClose={() => {
+                    setShowManageGroups(false);
+                    getGroups().then(setGroups).catch(() => {});
+                }}
+            />
 
             {/* Modifier groupe étudiant */}
             <Modal
@@ -204,27 +195,6 @@ export default function Etudiants() {
                     value={editGroup}
                     onChange={(e) => setEditGroup(e.target.value)}
                     options={groupOptions}
-                />
-            </Modal>
-
-            {/* Créer un groupe */}
-            <Modal
-                isOpen={showCreateGroup}
-                onClose={() => { setShowCreateGroup(false); setNewGroupName(""); }}
-                title="Créer un groupe"
-                size="sm"
-                footer={
-                    <div className={styles.footer}>
-                        <button className={styles.cancelBtn} onClick={() => setShowCreateGroup(false)} type="button">Annuler</button>
-                        <button className={styles.saveBtn} onClick={handleCreateGroup} disabled={!newGroupName.trim()}>Créer</button>
-                    </div>
-                }
-            >
-                <FormField
-                    label="Nom du groupe"
-                    placeholder="ex: D301"
-                    value={newGroupName}
-                    onChange={(e) => setNewGroupName(e.target.value.toUpperCase())}
                 />
             </Modal>
 

@@ -2,6 +2,7 @@ import { useLocation, Routes, Route, Navigate } from "react-router-dom";
 
 import { SideMenuProvider } from "../components/layout/SideMenu/SideMenuContext";
 import { SavedProvider } from "../contexts/SavedContext";
+import { SecteurProvider } from "../contexts/SecteurContext";
 import SideMenu from "../components/layout/SideMenu/SideMenu";
 import Main from "../components/layout/Main/Main";
 
@@ -11,6 +12,8 @@ import Recherche from "../pages/Recherche";
 import Stages from "../pages/Stages";
 import Etudiants from "../pages/Etudiants";
 import Entreprises from "../pages/Entreprises";
+import EditEntreprisePage from "../pages/EditEntreprisePage";
+import StageDetailPage from "../pages/StageDetailPage";
 import Utilisateurs from "../pages/Utilisateurs";
 import Inbox from "../pages/Inbox";
 import Saved from "../pages/Saved";
@@ -34,6 +37,7 @@ export default function DashboardLayout() {
 
     return (
         <SavedProvider>
+        <SecteurProvider>
         <SideMenuProvider>
             <SideMenu />
             <Main>
@@ -44,6 +48,8 @@ export default function DashboardLayout() {
                     <Route path="stages" element={<Stages />} />
                     <Route path="etudiants" element={<Etudiants />} />
                     <Route path="entreprises" element={<Entreprises />} />
+                    <Route path="entreprises/:id/modifier" element={<EditEntreprisePage />} />
+                    <Route path="stages/:id" element={<StageDetailPage />} />
                     <Route path="utilisateurs" element={<Utilisateurs />} />
                     <Route path="inbox" element={<Inbox />} />
                     <Route path="saved" element={<Saved />} />
@@ -55,6 +61,7 @@ export default function DashboardLayout() {
 
             {modal}
         </SideMenuProvider>
+        </SecteurProvider>
         </SavedProvider>
     );
 }

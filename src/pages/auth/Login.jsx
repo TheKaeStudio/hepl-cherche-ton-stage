@@ -33,11 +33,11 @@ export default function Login() {
             login(token, user);
             navigate("/");
         } catch (err) {
-            const msg = err.response?.data?.error ?? err.response?.data?.message ?? "Identifiants incorrects.";
-            if (/v[eé]rifi|activ|not verified/i.test(msg)) {
+            if (err.response?.data?.code === "EMAIL_NOT_VERIFIED") {
                 navigate("/verify-email");
                 return;
             }
+            const msg = err.response?.data?.error ?? "Identifiants incorrects.";
             setErrors({ global: msg });
         } finally {
             setLoading(false);

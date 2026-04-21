@@ -15,7 +15,7 @@ export default function Activate() {
         activateAccount(token)
             .then(() => setStatus("success"))
             .catch((err) => {
-                setMessage(err.response?.data?.message ?? "Lien invalide ou expiré.");
+                setMessage(err.response?.data?.error ?? "Lien invalide ou expiré.");
                 setStatus("error");
             });
     }, [token]);
