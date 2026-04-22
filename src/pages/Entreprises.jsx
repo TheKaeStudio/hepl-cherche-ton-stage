@@ -1,13 +1,16 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCompanies, createCompany, deleteCompany, giveAccess } from "@/api/companies";
 import { useSecteurs } from "@/contexts/SecteurContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { usePaginatedList } from "@/hooks/usePaginatedList";
 import SearchBar from "@/components/ui/SearchBar/SearchBar";
 import ActionButton from "@/components/ui/ActionButton/ActionButton";
 import DropdownActionMenu from "@/components/ui/DropdownActionMenu/DropdownActionMenu";
 import Toolbar from "@/components/layout/Toolbar/Toolbar";
 import DataTable from "@/components/dataTable/DataTable";
 import Tag from "@/components/ui/Tag/Tag";
+import LoadMore from "@/components/ui/LoadMore/LoadMore";
 import EntrepriseSheet from "@/components/sheets/EntrepriseSheet";
 import CreateEntrepriseModal from "./CreateEntrepriseModal";
 import GestionSecteursModal from "./GestionSecteursModal";
@@ -21,13 +24,14 @@ import PlusIcon   from "@mui/icons-material/Add";
 
 import styles from "./Entreprises.module.scss";
 
-
 export default function Entreprises() {
-    const navigate  = useNavigate();
-    const { sectors } = useSecteurs();
+    const navigate        = useNavigate();
+    const { sectors }     = useSecteurs();
+    const { user }        = useAuth();
 
-    const [companies,       setCompanies]       = useState([]);
-    const [loading,         setLoading]         = useState(true);
+    const { items: companies, loading, loadingMore, hasMore, total, loadMore, setItems: setCompanies } =
+        usePaginatedList((params) => getCompanies(params), 20);
+
     const [selectedCompany, setSelectedCompany] = useState(null);
     const [showCreate,      setShowCreate]      = useState(false);
     const [showSecteurs,    setShowSecteurs]    = useState(false);
@@ -37,12 +41,6 @@ export default function Entreprises() {
     const [sortDir,         setSortDir]         = useState("asc");
     const [showFilter,      setShowFilter]      = useState(false);
     const [filters,         setFilters]         = useState({});
-
-    useEffect(() => {
-        getCompanies()
-            .then(setCompanies)
-            .finally(() => setLoading(false));
-    }, []);
 
     async function handleCreate(payload) {
         const created = await createCompany(payload);
@@ -73,22 +71,21 @@ export default function Entreprises() {
         else { setSortKey(key); setSortDir("asc"); }
     }
 
-    const FILTER_CONFIG = useMemo(() => [
-        {
-            key: "domain",
-            label: "Secteur",
-            options: sectors.map((s) => ({ value: s.name, label: s.name })),
-        },
-        {
-            key: "province",
-            label: "Lieu",
-            options: [
-                { value: "Liège",   label: "Liège" },
-                { value: "Namur",   label: "Namur" },
-                { value: "Hainaut", label: "Hainaut" },
-            ],
-        },
-    ], [sectors]);
+    const FILTER_CONFIG = useMemo(() => {
+        const provinces = [...new Set(companies.map((c) => c.province).filter(Boolean))].sort();
+        return [
+            {
+                key: "domain",
+                label: "Secteur",
+                options: sectors.map((s) => ({ value: s.name, label: s.name })),
+            },
+            {
+                key: "province",
+                label: "Province",
+                options: provinces.map((p) => ({ value: p, label: p })),
+            },
+        ];
+    }, [companies, sectors]);
 
     const displayed = useMemo(() => {
         let list = [...companies];
@@ -112,29 +109,31 @@ export default function Entreprises() {
                     <h2>Liste des entreprises</h2>
                     <p>Gérez les entreprises partenaires et leurs offres de stage.</p>
                 </div>
-                <Toolbar
-                    searchBar={<SearchBar placeholder="Rechercher une entreprise…" />}
-                    sortButton={
-                        <ActionButton icon={SortIcon}>
-                            {sortKey ? `Trié par ${sortKey}` : "Les plus récents"}
-                        </ActionButton>
-                    }
-                    filterButton={
-                        <ActionButton icon={FilterIcon} onClick={() => setShowFilter(true)}>
-                            Filtres{activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}
-                        </ActionButton>
-                    }
-                    createButton={
-                        <DropdownActionMenu
-                            icon={PlusIcon}
-                            filled
-                            items={[
-                                { label: "Ajouter une entreprise", onClick: () => setShowCreate(true) },
-                                { label: "Gérer les secteurs",     onClick: () => setShowSecteurs(true) },
-                            ]}
-                        />
-                    }
-                />
+                {user?.role !== "limited" && (
+                    <Toolbar
+                        searchBar={<SearchBar placeholder="Rechercher une entreprise…" />}
+                        sortButton={
+                            <ActionButton icon={SortIcon}>
+                                {sortKey ? `Trié par ${sortKey}` : "Les plus récents"}
+                            </ActionButton>
+                        }
+                        filterButton={
+                            <ActionButton icon={FilterIcon} onClick={() => setShowFilter(true)}>
+                                Filtres{activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}
+                            </ActionButton>
+                        }
+                        createButton={
+                            <DropdownActionMenu
+                                icon={PlusIcon}
+                                filled
+                                items={[
+                                    { label: "Ajouter une entreprise", onClick: () => setShowCreate(true) },
+                                    { label: "Gérer les secteurs",     onClick: () => setShowSecteurs(true) },
+                                ]}
+                            />
+                        }
+                    />
+                )}
                 <DataTable>
                     <DataTable.Header sortKey={sortKey} sortDir={sortDir} onSort={handleSort}>
                         <DataTable.Row>
@@ -170,6 +169,7 @@ export default function Entreprises() {
                         })}
                     </DataTable.Body>
                 </DataTable>
+                <LoadMore hasMore={hasMore} loading={loadingMore} onLoadMore={loadMore} count={companies.length} total={total} />
             </section>
 
             <EntrepriseSheet company={selectedCompany} onClose={() => setSelectedCompany(null)} />

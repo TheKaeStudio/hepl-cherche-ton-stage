@@ -1,0 +1,37 @@
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.groupLabel {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin: 0;
+}
+
+.fieldGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.radioGroup {
+    display: flex;
+    gap: 20px;
+}
+
+.checkboxRow {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}

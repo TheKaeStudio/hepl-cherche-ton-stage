@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { getCompanies } from "@/api/companies";
 import { useSaved } from "@/contexts/SavedContext";
+import { useSecteurs } from "@/contexts/SecteurContext";
 import styles from "./Recherche.module.scss";
 
 import SearchBar from "@/components/ui/SearchBar/SearchBar";
@@ -14,35 +15,14 @@ import SortIcon from "@mui/icons-material/ImportExport";
 import FilterIcon from "@mui/icons-material/FilterList";
 
 const SORT_OPTIONS = [
-    { key: null,       label: "Par défaut"  },
-    { key: "name_asc", label: "Nom A → Z"  },
-    { key: "name_desc", label: "Nom Z → A" },
-];
-
-const FILTER_CONFIG = [
-    {
-        key: "domain",
-        label: "Domaine",
-        options: [
-            { value: "Informatique", label: "Informatique" },
-            { value: "Agriculture",  label: "Agriculture"  },
-            { value: "Commerce",     label: "Commerce"     },
-            { value: "Industrie",    label: "Industrie"    },
-        ],
-    },
-    {
-        key: "province",
-        label: "Province",
-        options: [
-            { value: "Liège",  label: "Liège"  },
-            { value: "Namur",  label: "Namur"  },
-            { value: "Hainaut", label: "Hainaut" },
-        ],
-    },
+    { key: null,        label: "Par défaut" },
+    { key: "name_asc",  label: "Nom A → Z"  },
+    { key: "name_desc", label: "Nom Z → A"  },
 ];
 
 export default function Recherche() {
     const { savedIds, toggleSaved } = useSaved();
+    const { sectors } = useSecteurs();
     const [companies, setCompanies] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedCompany, setSelectedCompany] = useState(null);
@@ -60,6 +40,22 @@ export default function Recherche() {
 
     const activeFilterCount = Object.values(filters).flat().length;
     const currentSort = SORT_OPTIONS[sortIdx];
+
+    const FILTER_CONFIG = useMemo(() => {
+        const provinces = [...new Set(companies.map((c) => c.province).filter(Boolean))].sort();
+        return [
+            {
+                key: "domain",
+                label: "Domaine",
+                options: sectors.map((s) => ({ value: s.name, label: s.name })),
+            },
+            {
+                key: "province",
+                label: "Province",
+                options: provinces.map((p) => ({ value: p, label: p })),
+            },
+        ];
+    }, [companies, sectors]);
 
     const displayed = useMemo(() => {
         let list = companies.filter((c) => {

@@ -1,0 +1,28 @@
+.root {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 20px 0 4px;
+}
+
+.count {
+    font-size: 13px;
+    color: var(--text);
+}
+
+.btn {
+    padding: 8px 20px;
+    border-radius: 8px;
+    border: 2px solid var(--border);
+    background: var(--bg);
+    color: var(--text-h);
+    font-size: 14px;
+    font-weight: 600;
+    font-family: var(--sans);
+    cursor: pointer;
+    transition: background 0.15s;
+
+    &:hover:not(:disabled) { background: var(--bg-alt, var(--bg)); filter: brightness(0.95); }
+    &:disabled { opacity: 0.6; cursor: default; }
+}

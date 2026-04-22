@@ -1,9 +1,9 @@
 import client from "./client";
 
 export function normalizeCompany(c) {
-    const rawContacts = Array.isArray(c.contactPersons) && c.contactPersons.length > 0
-        ? c.contactPersons
-        : (c.contactPerson ? [c.contactPerson] : []);
+    const rawContacts = Array.isArray(c.contacts) && c.contacts.length > 0
+        ? c.contacts
+        : (c.contact ? [c.contact] : []);
 
     return {
         id:          c._id,
@@ -29,9 +29,12 @@ export function normalizeCompany(c) {
     };
 }
 
-export async function getCompanies() {
-    const { data } = await client.get("/company");
-    return data.companies.map(normalizeCompany);
+export async function getCompanies({ page, limit = 20 } = {}) {
+    const params = page !== undefined ? { page, limit } : {};
+    const { data } = await client.get("/company", { params });
+    const items = data.companies.map(normalizeCompany);
+    if (page !== undefined) return { items, total: data.total ?? items.length, hasMore: data.hasMore ?? false };
+    return items;
 }
 
 export async function getCompany(id) {

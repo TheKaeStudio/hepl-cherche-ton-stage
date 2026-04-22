@@ -2,15 +2,16 @@ import { useState, useMemo, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { getUsers, updateUser, deleteUser, clearAllGroups } from "@/api/users";
 import { getGroups } from "@/api/groups";
+import { usePaginatedList } from "@/hooks/usePaginatedList";
 import SearchBar from "@/components/ui/SearchBar/SearchBar";
 import ActionButton from "@/components/ui/ActionButton/ActionButton";
 import DropdownActionMenu from "@/components/ui/DropdownActionMenu/DropdownActionMenu";
-// ActionButton gardé pour sort/filter buttons
 import Toolbar from "@/components/layout/Toolbar/Toolbar";
 import DataTable from "@/components/dataTable/DataTable";
 import Modal from "@/components/ui/Modal/Modal";
 import FormField from "@/components/ui/FormField/FormField";
 import Tag from "@/components/ui/Tag/Tag";
+import LoadMore from "@/components/ui/LoadMore/LoadMore";
 import UserSheet from "@/components/sheets/UserSheet";
 import DeleteConfirm from "@/components/ui/DeleteConfirm/DeleteConfirm";
 import FilterModal from "./FilterModal";
@@ -18,23 +19,23 @@ import SendMessageModal from "./SendMessageModal";
 import GestionGroupesModal from "./GestionGroupesModal";
 import styles from "./Etudiants.module.scss";
 
-import SortIcon from "@mui/icons-material/ImportExport";
+import SortIcon   from "@mui/icons-material/ImportExport";
 import FilterIcon from "@mui/icons-material/FilterList";
-import AddIcon from "@mui/icons-material/Add";
+import AddIcon    from "@mui/icons-material/Add";
 
 export default function Etudiants() {
     const { user: currentUser } = useAuth();
     const isManager = currentUser?.role === "manager" || currentUser?.role === "admin";
 
-    const [students,   setStudents]   = useState([]);
-    const [loading,    setLoading]    = useState(true);
-    const [groups,     setGroups]     = useState([]);
+    const { items: students, loading, loadingMore, hasMore, total, loadMore, setItems: setStudents } =
+        usePaginatedList((params) => getUsers({ ...params, role: "etudiant" }), 20);
 
-    const [viewTarget,   setViewTarget]   = useState(null);
-    const [editTarget,   setEditTarget]   = useState(null);
+    const [groups,     setGroups]     = useState([]);
+    const [viewTarget, setViewTarget] = useState(null);
+    const [editTarget, setEditTarget] = useState(null);
     const [deleteTarget, setDeleteTarget] = useState(null);
-    const [editGroup,    setEditGroup]    = useState("");
-    const [editSaving,   setEditSaving]   = useState(false);
+    const [editGroup,  setEditGroup]  = useState("");
+    const [editSaving, setEditSaving] = useState(false);
 
     const [showMessage,      setShowMessage]      = useState(false);
     const [showManageGroups, setShowManageGroups] = useState(false);
@@ -46,12 +47,7 @@ export default function Etudiants() {
     const [filters,    setFilters]    = useState({});
 
     useEffect(() => {
-        Promise.all([getUsers(), getGroups()])
-            .then(([list, groupList]) => {
-                setStudents(list.filter((u) => u.role === "etudiant"));
-                setGroups(groupList);
-            })
-            .finally(() => setLoading(false));
+        getGroups().then(setGroups).catch(() => {});
     }, []);
 
     function handleSort(key) {
@@ -120,9 +116,9 @@ export default function Etudiants() {
                         <DropdownActionMenu
                             icon={AddIcon}
                             items={[
-                                { label: "Envoyer un message",          onClick: () => setShowMessage(true) },
-                                { label: "Gérer les groupes",           onClick: () => setShowManageGroups(true) },
-                                { label: "Réinitialiser tous les groupes", onClick: () => setClearGroupsOpen(true), danger: true },
+                                { label: "Envoyer un message",               onClick: () => setShowMessage(true) },
+                                { label: "Gérer les groupes",                onClick: () => setShowManageGroups(true) },
+                                { label: "Réinitialiser tous les groupes",   onClick: () => setClearGroupsOpen(true), danger: true },
                             ]}
                         />
                     ) : null}
@@ -155,19 +151,16 @@ export default function Etudiants() {
                         ))}
                     </DataTable.Body>
                 </DataTable>
+                <LoadMore hasMore={hasMore} loading={loadingMore} onLoadMore={loadMore} count={students.length} total={total} />
             </section>
 
             <UserSheet user={viewTarget} onClose={() => setViewTarget(null)} />
             <SendMessageModal isOpen={showMessage} onClose={() => setShowMessage(false)} />
             <GestionGroupesModal
                 isOpen={showManageGroups}
-                onClose={() => {
-                    setShowManageGroups(false);
-                    getGroups().then(setGroups).catch(() => {});
-                }}
+                onClose={() => { setShowManageGroups(false); getGroups().then(setGroups).catch(() => {}); }}
             />
 
-            {/* Modifier groupe étudiant */}
             <Modal
                 isOpen={!!editTarget}
                 onClose={() => setEditTarget(null)}
@@ -182,22 +175,10 @@ export default function Etudiants() {
                     </div>
                 }
             >
-                <FormField
-                    label="Groupe"
-                    type="select"
-                    value={editGroup}
-                    onChange={(e) => setEditGroup(e.target.value)}
-                    options={groupOptions}
-                />
+                <FormField label="Groupe" type="select" value={editGroup} onChange={(e) => setEditGroup(e.target.value)} options={groupOptions} />
             </Modal>
 
-            <FilterModal
-                isOpen={showFilter}
-                onClose={() => setShowFilter(false)}
-                config={FILTER_CONFIG}
-                values={filters}
-                onChange={setFilters}
-            />
+            <FilterModal isOpen={showFilter} onClose={() => setShowFilter(false)} config={FILTER_CONFIG} values={filters} onChange={setFilters} />
             <DeleteConfirm
                 isOpen={!!deleteTarget}
                 onClose={() => setDeleteTarget(null)}

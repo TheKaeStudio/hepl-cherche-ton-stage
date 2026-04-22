@@ -16,9 +16,12 @@ function normalizeMessage(m) {
     };
 }
 
-export async function getMessages() {
-    const { data } = await client.get("/messages");
-    return data.messages.map(normalizeMessage);
+export async function getMessages({ page, limit = 20 } = {}) {
+    const params = page !== undefined ? { page, limit } : {};
+    const { data } = await client.get("/messages", { params });
+    const items = data.messages.map(normalizeMessage);
+    if (page !== undefined) return { items, total: data.total ?? items.length, hasMore: data.hasMore ?? false };
+    return items;
 }
 
 export async function getMessage(id) {

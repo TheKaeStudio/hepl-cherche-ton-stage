@@ -2,18 +2,20 @@ import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getInternships, deleteInternship } from "@/api/internships";
 import { getGroups } from "@/api/groups";
+import { usePaginatedList } from "@/hooks/usePaginatedList";
 import SearchBar from "@/components/ui/SearchBar/SearchBar";
 import ActionButton from "@/components/ui/ActionButton/ActionButton";
 import Toolbar from "@/components/layout/Toolbar/Toolbar";
 import DataTable from "@/components/dataTable/DataTable";
 import Tag from "@/components/ui/Tag/Tag";
+import LoadMore from "@/components/ui/LoadMore/LoadMore";
 import DeleteConfirm from "@/components/ui/DeleteConfirm/DeleteConfirm";
 import FilterModal from "./FilterModal";
 import CreateStageModal from "./CreateStageModal";
 
-import SortIcon from "@mui/icons-material/ImportExport";
+import SortIcon   from "@mui/icons-material/ImportExport";
 import FilterIcon from "@mui/icons-material/FilterList";
-import PlusIcon from "@mui/icons-material/Add";
+import PlusIcon   from "@mui/icons-material/Add";
 
 const STATUS_OPTIONS = [
     { value: "assigned",       label: "À remplir"  },
@@ -27,20 +29,19 @@ const STATUS_OPTIONS = [
 
 export default function Stages() {
     const navigate = useNavigate();
-    const [stages, setStages] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [groups,  setGroups]  = useState([]);
+    const [groups,       setGroups]       = useState([]);
     const [deleteTarget, setDeleteTarget] = useState(null);
-    const [showCreate, setShowCreate] = useState(false);
-    const [sortKey, setSortKey] = useState(null);
-    const [sortDir, setSortDir] = useState("asc");
-    const [showFilter, setShowFilter] = useState(false);
-    const [filters, setFilters] = useState({});
+    const [showCreate,   setShowCreate]   = useState(false);
+    const [sortKey,      setSortKey]      = useState(null);
+    const [sortDir,      setSortDir]      = useState("asc");
+    const [showFilter,   setShowFilter]   = useState(false);
+    const [filters,      setFilters]      = useState({});
+
+    const { items: stages, loading, loadingMore, hasMore, total, loadMore, setItems: setStages } =
+        usePaginatedList((params) => getInternships(params), 20);
 
     useEffect(() => {
-        Promise.all([getInternships(), getGroups()])
-            .then(([list, groupList]) => { setStages(list); setGroups(groupList); })
-            .finally(() => setLoading(false));
+        getGroups().then(setGroups).catch(() => {});
     }, []);
 
     async function handleCreate(newStage) {
@@ -55,12 +56,8 @@ export default function Stages() {
     }
 
     function handleSort(key) {
-        if (sortKey === key) {
-            setSortDir((d) => (d === "asc" ? "desc" : "asc"));
-        } else {
-            setSortKey(key);
-            setSortDir("asc");
-        }
+        if (sortKey === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+        else { setSortKey(key); setSortDir("asc"); }
     }
 
     const FILTER_CONFIG = useMemo(() => [
@@ -70,24 +67,16 @@ export default function Stages() {
 
     const displayed = useMemo(() => {
         let list = [...stages];
-
         if (filters.status?.length) list = list.filter((s) => filters.status.includes(s.status));
         if (filters.group?.length)  list = list.filter((s) => filters.group.includes(s.group));
-
-        // Sort
         if (sortKey) {
             list.sort((a, b) => {
-                let aVal = sortKey === "student" ? (a.student?.name ?? "")
-                         : sortKey === "company" ? (a.company?.name ?? "")
-                         : a[sortKey] ?? "";
-                let bVal = sortKey === "student" ? (b.student?.name ?? "")
-                         : sortKey === "company" ? (b.company?.name ?? "")
-                         : b[sortKey] ?? "";
-                const cmp = String(aVal).localeCompare(String(bVal), "fr");
+                const aVal = sortKey === "student" ? (a.student?.name ?? "") : sortKey === "company" ? (a.company?.name ?? "") : a[sortKey] ?? "";
+                const bVal = sortKey === "student" ? (b.student?.name ?? "") : sortKey === "company" ? (b.company?.name ?? "") : b[sortKey] ?? "";
+                const cmp  = String(aVal).localeCompare(String(bVal), "fr");
                 return sortDir === "asc" ? cmp : -cmp;
             });
         }
-
         return list;
     }, [stages, sortKey, sortDir, filters]);
 
@@ -140,17 +129,11 @@ export default function Stages() {
                                         : <span style={{ color: "var(--text)" }}>—</span>}
                                 </DataTable.Cell>
                                 <DataTable.Cell muted>
-                                    {stage.startDate
-                                        ? new Date(stage.startDate).toLocaleDateString("fr-BE", { day: "numeric", month: "short" })
-                                        : "—"}
+                                    {stage.startDate ? new Date(stage.startDate).toLocaleDateString("fr-BE", { day: "numeric", month: "short" }) : "—"}
                                     {stage.startDate && stage.endDate && " → "}
-                                    {stage.endDate
-                                        ? new Date(stage.endDate).toLocaleDateString("fr-BE", { day: "numeric", month: "short", year: "numeric" })
-                                        : ""}
+                                    {stage.endDate ? new Date(stage.endDate).toLocaleDateString("fr-BE", { day: "numeric", month: "short", year: "numeric" }) : ""}
                                 </DataTable.Cell>
-                                <DataTable.Cell>
-                                    <Tag status={stage.status} />
-                                </DataTable.Cell>
+                                <DataTable.Cell><Tag status={stage.status} /></DataTable.Cell>
                                 <DataTable.Actions
                                     onView={() => navigate(`/stages/${stage.id}`)}
                                     onDelete={() => setDeleteTarget(stage)}
@@ -159,6 +142,7 @@ export default function Stages() {
                         ))}
                     </DataTable.Body>
                 </DataTable>
+                <LoadMore hasMore={hasMore} loading={loadingMore} onLoadMore={loadMore} count={stages.length} total={total} />
             </section>
 
             <CreateStageModal isOpen={showCreate} onClose={() => setShowCreate(false)} onSave={handleCreate} />

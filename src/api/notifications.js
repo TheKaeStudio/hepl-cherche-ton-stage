@@ -19,9 +19,12 @@ function normalizeNotification(n) {
     };
 }
 
-export async function getNotifications() {
-    const { data } = await client.get("/notifications");
-    return data.notifications.map(normalizeNotification);
+export async function getNotifications({ page, limit = 20 } = {}) {
+    const params = page !== undefined ? { page, limit } : {};
+    const { data } = await client.get("/notifications", { params });
+    const items = data.notifications.map(normalizeNotification);
+    if (page !== undefined) return { items, total: data.total ?? items.length, hasMore: data.hasMore ?? false };
+    return items;
 }
 
 export async function markNotificationRead(id) {

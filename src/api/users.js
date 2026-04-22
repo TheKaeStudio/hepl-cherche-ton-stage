@@ -31,10 +31,15 @@ export function normalizeUser(u) {
     };
 }
 
-export async function getUsers() {
-    const { data } = await client.get("/users");
+export async function getUsers({ page, limit = 20, role } = {}) {
+    const params = {};
+    if (page !== undefined) { params.page = page; params.limit = limit; }
+    if (role) params.role = ROLE_MAP_REVERSE[role] ?? role;
+    const { data } = await client.get("/users", { params });
     const list = data.users ?? data.data ?? data;
-    return (Array.isArray(list) ? list : []).map(normalizeUser);
+    const items = (Array.isArray(list) ? list : []).map(normalizeUser);
+    if (page !== undefined) return { items, total: data.total ?? items.length, hasMore: data.hasMore ?? false };
+    return items;
 }
 
 export async function updateUser(id, payload) {

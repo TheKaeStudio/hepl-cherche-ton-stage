@@ -1,6 +1,7 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Modal from "@/components/ui/Modal/Modal";
 import FormField from "@/components/ui/FormField/FormField";
+import UserPickerModal from "@/components/ui/UserPickerModal/UserPickerModal";
 import { getUsers } from "@/api/users";
 import { getGroups } from "@/api/groups";
 import { createInternship } from "@/api/internships";
@@ -13,37 +14,28 @@ const SCHOOL_YEARS = (() => {
     return [`${y - 1}/${y}`, `${y}/${y + 1}`, `${y + 1}/${y + 2}`];
 })();
 
-const empty = { type: "", schoolYear: SCHOOL_YEARS[1], deadline: "", group: "", studentId: "", studentSearch: "" };
+const empty = { type: "", schoolYear: SCHOOL_YEARS[1], deadline: "", group: "" };
 
 export default function CreateStageModal({ isOpen, onClose, onSave }) {
-    const [form,       setForm]       = useState(empty);
-    const [assignTo,   setAssignTo]   = useState("groupe");
-    const [errors,     setErrors]     = useState({});
-    const [submitting, setSubmitting] = useState(false);
+    const [form,            setForm]            = useState(empty);
+    const [assignTo,        setAssignTo]        = useState("groupe");
+    const [selectedStudent, setSelectedStudent] = useState(null);
+    const [showPicker,      setShowPicker]      = useState(false);
+    const [errors,          setErrors]          = useState({});
+    const [submitting,      setSubmitting]      = useState(false);
 
     const [students, setStudents] = useState([]);
     const [groups,   setGroups]   = useState([]);
 
-    const [searchOpen, setSearchOpen] = useState(false);
-    const searchRef = useRef(null);
-
     useEffect(() => {
         if (!isOpen) return;
-        Promise.all([getUsers(), getGroups()])
+        Promise.all([getUsers({ role: "student" }), getGroups()])
             .then(([users, groupList]) => {
-                setStudents(users.filter((u) => u.role === "etudiant"));
+                setStudents(Array.isArray(users) ? users : users.items ?? []);
                 setGroups(groupList);
             })
             .catch(() => {});
     }, [isOpen]);
-
-    useEffect(() => {
-        function handleClickOutside(e) {
-            if (searchRef.current && !searchRef.current.contains(e.target)) setSearchOpen(false);
-        }
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
 
     const groupOptions = useMemo(() => [
         { value: "", label: "Sélectionner un groupe" },
@@ -52,20 +44,14 @@ export default function CreateStageModal({ isOpen, onClose, onSave }) {
 
     const yearOptions = SCHOOL_YEARS.map((y) => ({ value: y, label: y }));
 
-    const filteredStudents = useMemo(() => {
-        const q = form.studentSearch.toLowerCase().trim();
-        if (!q) return students.slice(0, 8);
-        return students.filter((s) => s.name.toLowerCase().includes(q)).slice(0, 8);
-    }, [students, form.studentSearch]);
-
     const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
     function validate() {
         const e = {};
         if (!form.type)       e.type      = "Le type est requis.";
         if (!form.schoolYear) e.schoolYear = "L'année est requise.";
-        if (assignTo === "groupe"   && !form.group)     e.group     = "Le groupe est requis.";
-        if (assignTo === "etudiant" && !form.studentId) e.studentId = "L'étudiant est requis.";
+        if (assignTo === "groupe"   && !form.group)       e.group     = "Le groupe est requis.";
+        if (assignTo === "etudiant" && !selectedStudent)  e.studentId = "L'étudiant est requis.";
         return e;
     }
 
@@ -87,7 +73,7 @@ export default function CreateStageModal({ isOpen, onClose, onSave }) {
                     return;
                 }
             } else {
-                studentIds = [form.studentId];
+                studentIds = [selectedStudent.id];
             }
 
             const created = await createInternship({
@@ -98,10 +84,7 @@ export default function CreateStageModal({ isOpen, onClose, onSave }) {
                 group:      groupId,
             });
             onSave?.(created);
-            setForm(empty);
-            setErrors({});
-            setAssignTo("groupe");
-            onClose();
+            handleClose();
         } catch (err) {
             setErrors({ global: err.response?.data?.error ?? "Une erreur est survenue." });
         } finally {
@@ -113,92 +96,100 @@ export default function CreateStageModal({ isOpen, onClose, onSave }) {
         setForm(empty);
         setErrors({});
         setAssignTo("groupe");
+        setSelectedStudent(null);
         onClose();
     }
 
     return (
-        <Modal
-            isOpen={isOpen}
-            onClose={handleClose}
-            title="Ajouter un stage"
-            size="sm"
-            footer={
-                <div className={styles.footer}>
-                    <button className={styles.cancelBtn} onClick={handleClose} type="button">Annuler</button>
-                    <button className={styles.saveBtn} form="createStageForm" type="submit" disabled={submitting}>
-                        {submitting ? "Enregistrement…" : "Enregistrer"}
-                    </button>
-                </div>
-            }
-        >
-            <form id="createStageForm" onSubmit={handleSubmit} className={styles.form}>
-                {errors.global && <p className={styles.error}>{errors.global}</p>}
-
-                <div className={styles.fieldGroup}>
-                    <p className={styles.groupLabel}>Type de stage</p>
-                    <div className={styles.chips}>
-                        {TYPES.map((t) => (
-                            <button key={t} type="button"
-                                className={`${styles.chip} ${form.type === t ? styles.chipActive : ""}`}
-                                onClick={() => setForm((f) => ({ ...f, type: t }))}
-                            >{t}</button>
-                        ))}
+        <>
+            <Modal
+                isOpen={isOpen}
+                onClose={handleClose}
+                title="Ajouter un stage"
+                size="sm"
+                footer={
+                    <div className={styles.footer}>
+                        <button className={styles.cancelBtn} onClick={handleClose} type="button">Annuler</button>
+                        <button className={styles.saveBtn} form="createStageForm" type="submit" disabled={submitting}>
+                            {submitting ? "Enregistrement…" : "Enregistrer"}
+                        </button>
                     </div>
-                    {errors.type && <p className={styles.error}>{errors.type}</p>}
-                </div>
+                }
+            >
+                <form id="createStageForm" onSubmit={handleSubmit} className={styles.form}>
+                    {errors.global && <p className={styles.error}>{errors.global}</p>}
 
-                <div className={styles.row}>
-                    <FormField label="Année scolaire" type="select" value={form.schoolYear}
-                        onChange={set("schoolYear")} options={yearOptions} error={errors.schoolYear} required />
-                    <FormField label="Date limite" type="date" value={form.deadline} onChange={set("deadline")} />
-                </div>
-
-                <div className={styles.fieldGroup}>
-                    <p className={styles.groupLabel}>Assigner à</p>
-                    <div className={styles.chips}>
-                        <button type="button"
-                            className={`${styles.chip} ${assignTo === "groupe" ? styles.chipActive : ""}`}
-                            onClick={() => { setAssignTo("groupe"); setForm((f) => ({ ...f, studentId: "", studentSearch: "" })); }}
-                        >Groupe</button>
-                        <button type="button"
-                            className={`${styles.chip} ${assignTo === "etudiant" ? styles.chipActive : ""}`}
-                            onClick={() => { setAssignTo("etudiant"); setForm((f) => ({ ...f, group: "" })); }}
-                        >Étudiant</button>
-                    </div>
-                </div>
-
-                {assignTo === "groupe" && (
-                    <FormField label="Groupe" type="select" value={form.group}
-                        onChange={set("group")} options={groupOptions} error={errors.group} required />
-                )}
-
-                {assignTo === "etudiant" && (
                     <div className={styles.fieldGroup}>
-                        <p className={styles.groupLabel}>Étudiant</p>
-                        <div className={styles.searchWrap} ref={searchRef}>
-                            <input
-                                className={styles.searchInput}
-                                placeholder="Rechercher un étudiant..."
-                                value={form.studentSearch}
-                                onChange={(e) => { setForm((f) => ({ ...f, studentSearch: e.target.value, studentId: "" })); setSearchOpen(true); }}
-                                onFocus={() => setSearchOpen(true)}
-                                autoComplete="off"
-                            />
-                            {searchOpen && filteredStudents.length > 0 && (
-                                <ul className={styles.suggestions}>
-                                    {filteredStudents.map((s) => (
-                                        <li key={s.id} onMouseDown={() => { setForm((f) => ({ ...f, studentId: s.id, studentSearch: s.name })); setSearchOpen(false); }}>
-                                            <span className={styles.suggestName}>{s.name}</span>
-                                            {s.class && <span className={styles.suggestGroup}>{s.class}</span>}
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
+                        <p className={styles.groupLabel}>Type de stage</p>
+                        <div className={styles.chips}>
+                            {TYPES.map((t) => (
+                                <button key={t} type="button"
+                                    className={`${styles.chip} ${form.type === t ? styles.chipActive : ""}`}
+                                    onClick={() => setForm((f) => ({ ...f, type: t }))}
+                                >{t}</button>
+                            ))}
                         </div>
-                        {errors.studentId && <p className={styles.error}>{errors.studentId}</p>}
+                        {errors.type && <p className={styles.error}>{errors.type}</p>}
                     </div>
-                )}
-            </form>
-        </Modal>
+
+                    <div className={styles.row}>
+                        <FormField label="Année scolaire" type="select" value={form.schoolYear}
+                            onChange={set("schoolYear")} options={yearOptions} error={errors.schoolYear} required />
+                        <FormField label="Date limite" type="date" value={form.deadline} onChange={set("deadline")} />
+                    </div>
+
+                    <div className={styles.fieldGroup}>
+                        <p className={styles.groupLabel}>Assigner à</p>
+                        <div className={styles.chips}>
+                            <button type="button"
+                                className={`${styles.chip} ${assignTo === "groupe" ? styles.chipActive : ""}`}
+                                onClick={() => { setAssignTo("groupe"); setSelectedStudent(null); }}
+                            >Groupe</button>
+                            <button type="button"
+                                className={`${styles.chip} ${assignTo === "etudiant" ? styles.chipActive : ""}`}
+                                onClick={() => { setAssignTo("etudiant"); setForm((f) => ({ ...f, group: "" })); }}
+                            >Étudiant</button>
+                        </div>
+                    </div>
+
+                    {assignTo === "groupe" && (
+                        <FormField label="Groupe" type="select" value={form.group}
+                            onChange={set("group")} options={groupOptions} error={errors.group} required />
+                    )}
+
+                    {assignTo === "etudiant" && (
+                        <div className={styles.fieldGroup}>
+                            <p className={styles.groupLabel}>Étudiant</p>
+                            <div className={styles.userPick}>
+                                {selectedStudent ? (
+                                    <div className={styles.selectedChip}>
+                                        <span>{selectedStudent.name}</span>
+                                        {selectedStudent.class && (
+                                            <span className={styles.chipGroup}>{selectedStudent.class}</span>
+                                        )}
+                                        <button type="button" className={styles.changeBtn} onClick={() => setShowPicker(true)}>
+                                            Modifier
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <button type="button" className={styles.pickBtn} onClick={() => setShowPicker(true)}>
+                                        Rechercher un étudiant…
+                                    </button>
+                                )}
+                                {errors.studentId && <p className={styles.error}>{errors.studentId}</p>}
+                            </div>
+                        </div>
+                    )}
+                </form>
+            </Modal>
+
+            <UserPickerModal
+                isOpen={showPicker}
+                onClose={() => setShowPicker(false)}
+                onSelect={(u) => setSelectedStudent(u)}
+                title="Choisir un étudiant"
+                roleFilter="etudiant"
+            />
+        </>
     );
 }

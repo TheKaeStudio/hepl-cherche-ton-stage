@@ -109,9 +109,12 @@ export function normalizeInternship(i) {
     };
 }
 
-export async function getInternships() {
-    const { data } = await client.get("/internships");
-    return data.internships.map(normalizeInternship);
+export async function getInternships({ page, limit = 20 } = {}) {
+    const params = page !== undefined ? { page, limit } : {};
+    const { data } = await client.get("/internships", { params });
+    const items = data.internships.map(normalizeInternship);
+    if (page !== undefined) return { items, total: data.total ?? items.length, hasMore: data.hasMore ?? false };
+    return items;
 }
 
 export async function getInternship(id) {

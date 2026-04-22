@@ -1,0 +1,211 @@
+.root {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.empty {
+    font-size: 13px;
+    color: var(--text);
+    text-align: center;
+    padding: 16px 0 4px;
+    margin: 0;
+}
+
+/* ── List ── */
+
+.list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.item {
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    border-left-width: 4px;
+    overflow: hidden;
+    transition: border-color 0.15s;
+}
+
+.viewRow,
+.editRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+}
+
+.tag {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+}
+
+/* ── Color picker ── */
+
+.colorWrap {
+    position: relative;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.15s;
+
+    &:hover { opacity: 0.8; }
+}
+
+.colorInput {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+.colorDot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    pointer-events: none;
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+}
+
+/* ── Name input ── */
+
+.nameInput {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--bg);
+    color: var(--text-h);
+    font-size: 14px;
+    font-family: var(--sans);
+    outline: none;
+    min-width: 0;
+
+    &:focus { border-color: var(--accent); }
+    &::placeholder { color: var(--text); }
+}
+
+/* ── Action buttons ── */
+
+.rowActions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.iconBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    transition: background 0.1s, color 0.1s;
+
+    &:hover { background: var(--accent-bg, #f0f0ff); color: var(--accent); }
+    &.danger:hover { background: #fef2f2; color: #ef4444; }
+}
+
+.confirmBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    background: #22c55e1a;
+    color: #16a34a;
+    cursor: pointer;
+    transition: background 0.1s;
+
+    &:hover:not(:disabled) { background: #22c55e33; }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.cancelBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    transition: background 0.1s;
+
+    &:hover { background: #fef2f2; color: #ef4444; }
+}
+
+/* ── Add section ── */
+
+.addSection {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px;
+    background: var(--bg-alt, var(--bg));
+    border-radius: 12px;
+    border: 1.5px dashed var(--border);
+}
+
+.addLabel {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text);
+    margin: 0;
+}
+
+.addRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.addBtn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    background: var(--accent, #202020);
+    color: #fff;
+    border: none;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: var(--sans);
+    cursor: pointer;
+    transition: opacity 0.15s;
+    white-space: nowrap;
+    flex-shrink: 0;
+
+    &:hover:not(:disabled) { opacity: 0.85; }
+    &:disabled { opacity: 0.4; cursor: not-allowed; }
+}

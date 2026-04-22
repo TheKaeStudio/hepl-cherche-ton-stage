@@ -1,33 +1,28 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { getMessages, markMessageRead, sendMessage } from "@/api/messages";
+import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { formatDate } from "@/data/mock";
 import Avatar from "@/components/ui/Avatar/Avatar";
 import Modal from "@/components/ui/Modal/Modal";
 import ActionButton from "@/components/ui/ActionButton/ActionButton";
+import LoadMore from "@/components/ui/LoadMore/LoadMore";
 import styles from "./Inbox.module.scss";
 
 import SendIcon from "@mui/icons-material/Send";
 
 export default function Inbox() {
-    const [messages, setMessages] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [selectedMsg, setSelectedMsg] = useState(null);
-    const [reply, setReply] = useState("");
+    const { items: messages, loading, loadingMore, hasMore, total, loadMore, setItems: setMessages } =
+        usePaginatedList((params) => getMessages(params), 20);
 
-    useEffect(() => {
-        getMessages()
-            .then(setMessages)
-            .finally(() => setLoading(false));
-    }, []);
+    const [selectedMsg, setSelectedMsg] = useState(null);
+    const [reply,       setReply]       = useState("");
 
     function openMessage(msg) {
         setSelectedMsg(msg);
         setReply("");
         if (!msg.read) {
             markMessageRead(msg.id).catch(() => {});
-            setMessages((prev) =>
-                prev.map((m) => m.id === msg.id ? { ...m, read: true } : m)
-            );
+            setMessages((prev) => prev.map((m) => m.id === msg.id ? { ...m, read: true } : m));
         }
     }
 
@@ -41,9 +36,7 @@ export default function Inbox() {
         try {
             await sendMessage(selectedMsg.from.id, `Re: ${selectedMsg.subject}`, reply);
             setReply("");
-        } catch {
-            // silently ignore for now
-        }
+        } catch { /* ignore */ }
     }
 
     const unreadCount = messages.filter((m) => !m.read).length;
@@ -84,6 +77,7 @@ export default function Inbox() {
                         })}
                     </ul>
                 )}
+                <LoadMore hasMore={hasMore} loading={loadingMore} onLoadMore={loadMore} count={messages.length} total={total} />
             </section>
 
             <Modal

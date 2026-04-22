@@ -1,17 +1,19 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { ROLE_LABEL } from "@/data/mock";
 import { getUsers, deleteUser } from "@/api/users";
+import { usePaginatedList } from "@/hooks/usePaginatedList";
 import SearchBar from "@/components/ui/SearchBar/SearchBar";
 import ActionButton from "@/components/ui/ActionButton/ActionButton";
 import Toolbar from "@/components/layout/Toolbar/Toolbar";
 import DataTable from "@/components/dataTable/DataTable";
+import LoadMore from "@/components/ui/LoadMore/LoadMore";
 import SendMessageModal from "./SendMessageModal";
 import EditUserModal from "./EditUserModal";
 import UserSheet from "@/components/sheets/UserSheet";
 import DeleteConfirm from "@/components/ui/DeleteConfirm/DeleteConfirm";
 import FilterModal from "./FilterModal";
 
-import SortIcon from "@mui/icons-material/ImportExport";
+import SortIcon   from "@mui/icons-material/ImportExport";
 import FilterIcon from "@mui/icons-material/FilterList";
 import MessageIcon from "@mui/icons-material/MailOutlined";
 
@@ -20,61 +22,45 @@ const FILTER_CONFIG = [
         key: "role",
         label: "Rôle",
         options: [
-            { value: "etudiant",   label: "Étudiant"       },
-            { value: "enseignant", label: "Enseignant"      },
-            { value: "manager",    label: "Manager"         },
-            { value: "admin",      label: "Administrateur"  },
+            { value: "etudiant",   label: "Étudiant"      },
+            { value: "enseignant", label: "Enseignant"     },
+            { value: "manager",    label: "Manager"        },
+            { value: "admin",      label: "Administrateur" },
         ],
     },
 ];
 
 export default function Utilisateurs() {
-    const [users, setUsers] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [showMessage, setShowMessage] = useState(false);
+    const { items: users, loading, loadingMore, hasMore, total, loadMore, setItems: setUsers } =
+        usePaginatedList((params) => getUsers(params), 20);
+
+    const [showMessage,  setShowMessage]  = useState(false);
     const [viewTarget,   setViewTarget]   = useState(null);
     const [editTarget,   setEditTarget]   = useState(null);
     const [deleteTarget, setDeleteTarget] = useState(null);
-    const [sortKey, setSortKey] = useState(null);
-    const [sortDir, setSortDir] = useState("asc");
-    const [showFilter, setShowFilter] = useState(false);
-    const [filters, setFilters] = useState({});
-
-    useEffect(() => {
-        getUsers()
-            .then(setUsers)
-            .finally(() => setLoading(false));
-    }, []);
+    const [sortKey,      setSortKey]      = useState(null);
+    const [sortDir,      setSortDir]      = useState("asc");
+    const [showFilter,   setShowFilter]   = useState(false);
+    const [filters,      setFilters]      = useState({});
 
     function handleUserSaved(updated) {
         setUsers((prev) => prev.map((u) => u.id === updated.id ? updated : u));
     }
 
     function handleSort(key) {
-        if (sortKey === key) {
-            setSortDir((d) => (d === "asc" ? "desc" : "asc"));
-        } else {
-            setSortKey(key);
-            setSortDir("asc");
-        }
+        if (sortKey === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+        else { setSortKey(key); setSortDir("asc"); }
     }
 
     const displayed = useMemo(() => {
         let list = [...users];
-
-        if (filters.role?.length) {
-            list = list.filter((u) => filters.role.includes(u.role));
-        }
-
+        if (filters.role?.length) list = list.filter((u) => filters.role.includes(u.role));
         if (sortKey) {
             list.sort((a, b) => {
-                const aVal = a[sortKey] ?? "";
-                const bVal = b[sortKey] ?? "";
-                const cmp = String(aVal).localeCompare(String(bVal), "fr");
+                const cmp = String(a[sortKey] ?? "").localeCompare(String(b[sortKey] ?? ""), "fr");
                 return sortDir === "asc" ? cmp : -cmp;
             });
         }
-
         return list;
     }, [users, sortKey, sortDir, filters]);
 
@@ -116,9 +102,7 @@ export default function Utilisateurs() {
                     <DataTable.Body loading={loading}>
                         {displayed.map((user) => (
                             <DataTable.Row key={user.id}>
-                                <DataTable.UserCell user={user}>
-                                    {user.name}
-                                </DataTable.UserCell>
+                                <DataTable.UserCell user={user}>{user.name}</DataTable.UserCell>
                                 <DataTable.Cell muted>{ROLE_LABEL[user.role] ?? user.role}</DataTable.Cell>
                                 <DataTable.Cell muted>{user.email}</DataTable.Cell>
                                 <DataTable.Actions
@@ -130,22 +114,13 @@ export default function Utilisateurs() {
                         ))}
                     </DataTable.Body>
                 </DataTable>
+                <LoadMore hasMore={hasMore} loading={loadingMore} onLoadMore={loadMore} count={users.length} total={total} />
             </section>
 
             <UserSheet user={viewTarget} onClose={() => setViewTarget(null)} />
             <SendMessageModal isOpen={showMessage} onClose={() => setShowMessage(false)} />
-            <EditUserModal
-                user={editTarget}
-                onClose={() => setEditTarget(null)}
-                onSave={handleUserSaved}
-            />
-            <FilterModal
-                isOpen={showFilter}
-                onClose={() => setShowFilter(false)}
-                config={FILTER_CONFIG}
-                values={filters}
-                onChange={setFilters}
-            />
+            <EditUserModal user={editTarget} onClose={() => setEditTarget(null)} onSave={handleUserSaved} />
+            <FilterModal isOpen={showFilter} onClose={() => setShowFilter(false)} config={FILTER_CONFIG} values={filters} onChange={setFilters} />
             <DeleteConfirm
                 isOpen={!!deleteTarget}
                 onClose={() => setDeleteTarget(null)}

@@ -10,14 +10,14 @@ const ROLE_LABEL = {
     admin:      "Administrateur",
 };
 
-export default function UserPickerModal({ isOpen, onClose, onSelect, title = "Choisir un utilisateur" }) {
+export default function UserPickerModal({ isOpen, onClose, onSelect, title = "Choisir un utilisateur", roleFilter = null }) {
     const [search, setSearch] = useState("");
     const [users,  setUsers]  = useState([]);
 
     useEffect(() => {
         if (!isOpen) { setSearch(""); return; }
-        getUsers().then(setUsers).catch(() => {});
-    }, [isOpen]);
+        getUsers().then((all) => setUsers(roleFilter ? all.filter((u) => u.role === roleFilter) : all)).catch(() => {});
+    }, [isOpen, roleFilter]);
 
     const filtered = useMemo(() => {
         const q = search.toLowerCase().trim();
