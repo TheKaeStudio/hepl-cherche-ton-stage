@@ -18,9 +18,6 @@ export default function CompanyCard({ company, onLearnMore, isSaved, onToggleSav
                 {company?.offresObservation && (
                     <Tag>Stage d'observation</Tag>
                 )}
-                {company?.offresObservation && (
-                    <Tag>Stage d'observation</Tag>
-                )}
                 {company?.offres3e && (
                     <Tag>Stage BAC3</Tag>
                 )}
