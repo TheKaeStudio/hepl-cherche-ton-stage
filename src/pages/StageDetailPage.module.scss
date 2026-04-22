@@ -11,12 +11,20 @@
     font-weight: 600;
     color: var(--text);
     cursor: pointer;
-    transition: background 0.15s, color 0.15s;
+    transition:
+        background 0.15s,
+        color 0.15s;
     margin-bottom: 24px;
+    width: fit-content;
 
-    svg { font-size: 18px !important; }
+    svg {
+        font-size: 18px !important;
+    }
 
-    &:hover { background: var(--accent-bg); color: var(--text-h); }
+    &:hover {
+        background: var(--accent-bg);
+        color: var(--text-h);
+    }
 }
 
 // ─── Header ────────────────────────────────────────────────────────────────────
@@ -55,9 +63,13 @@
     border-radius: 999px;
     padding: 3px 10px;
 
-    svg { font-size: 14px !important; }
+    svg {
+        font-size: 14px !important;
+    }
 
-    [data-theme="dark"] & { background: rgba(249, 115, 22, 0.12); }
+    [data-theme="dark"] & {
+        background: rgba(249, 115, 22, 0.12);
+    }
 }
 
 // ─── Info grid ─────────────────────────────────────────────────────────────────
@@ -71,8 +83,12 @@
     border-radius: 16px;
     background: var(--bg);
 
-    @media (max-width: 640px) { grid-template-columns: 1fr 1fr; }
-    @media (max-width: 420px) { grid-template-columns: 1fr; }
+    @media (max-width: 640px) {
+        grid-template-columns: 1fr 1fr;
+    }
+    @media (max-width: 420px) {
+        grid-template-columns: 1fr;
+    }
 }
 
 .infoItem {
@@ -119,9 +135,16 @@
     color: #ef4444;
     margin-bottom: 24px;
 
-    svg { font-size: 18px !important; flex-shrink: 0; margin-top: 1px; }
+    svg {
+        font-size: 18px !important;
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
 
-    [data-theme="dark"] & { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); }
+    [data-theme="dark"] & {
+        background: rgba(239, 68, 68, 0.1);
+        border-color: rgba(239, 68, 68, 0.3);
+    }
 }
 
 // ─── Task cards ────────────────────────────────────────────────────────────────
@@ -178,9 +201,13 @@
     border-radius: 999px;
     padding: 3px 10px;
 
-    svg { font-size: 14px !important; }
+    svg {
+        font-size: 14px !important;
+    }
 
-    [data-theme="dark"] & { background: rgba(34, 197, 94, 0.1); }
+    [data-theme="dark"] & {
+        background: rgba(34, 197, 94, 0.1);
+    }
 }
 
 .taskBadgePending {
@@ -195,7 +222,9 @@
     border-radius: 999px;
     padding: 3px 10px;
 
-    [data-theme="dark"] & { background: rgba(59, 130, 246, 0.1); }
+    [data-theme="dark"] & {
+        background: rgba(59, 130, 246, 0.1);
+    }
 }
 
 .pendingNote {
@@ -215,7 +244,9 @@
     gap: 14px 24px;
     margin: 0;
 
-    @media (max-width: 520px) { grid-template-columns: 1fr; }
+    @media (max-width: 520px) {
+        grid-template-columns: 1fr;
+    }
 }
 
 .missionList {
@@ -225,7 +256,11 @@
     flex-direction: column;
     gap: 4px;
 
-    li { font-size: 14px; font-weight: 600; color: var(--text-h); }
+    li {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-h);
+    }
 }
 
 // ─── Review form ───────────────────────────────────────────────────────────────
@@ -271,13 +306,25 @@
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
-    transition: border-color 0.15s, background 0.15s;
+    transition:
+        border-color 0.15s,
+        background 0.15s;
     min-height: 54px;
 
-    svg { font-size: 20px !important; flex-shrink: 0; }
-    span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    svg {
+        font-size: 20px !important;
+        flex-shrink: 0;
+    }
+    span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
 
-    &:hover { border-color: var(--accent-border); background: var(--accent-bg); }
+    &:hover {
+        border-color: var(--accent-border);
+        background: var(--accent-bg);
+    }
 
     &.uploadLabelDone {
         border-style: solid;
@@ -285,7 +332,9 @@
         background: #f0fdf4;
         color: #15803d;
 
-        [data-theme="dark"] & { background: rgba(34, 197, 94, 0.08); }
+        [data-theme="dark"] & {
+            background: rgba(34, 197, 94, 0.08);
+        }
     }
 }
 
@@ -312,9 +361,14 @@
     font-weight: 600;
     color: var(--text-h);
     text-decoration: none;
-    transition: background 0.15s, border-color 0.15s;
+    transition:
+        background 0.15s,
+        border-color 0.15s;
 
-    &:hover { background: var(--accent-bg); border-color: var(--accent-border); }
+    &:hover {
+        background: var(--accent-bg);
+        border-color: var(--accent-border);
+    }
 }
 
 // ─── Form components ───────────────────────────────────────────────────────────
@@ -335,7 +389,10 @@
     gap: 12px;
     flex-wrap: wrap;
 
-    > * { flex: 1; min-width: 140px; }
+    > * {
+        flex: 1;
+        min-width: 140px;
+    }
 }
 
 .formGroup {
@@ -369,7 +426,9 @@
         cursor: pointer;
     }
 
-    input[type="radio"] { accent-color: var(--accent); }
+    input[type="radio"] {
+        accent-color: var(--accent);
+    }
 }
 
 .companyAssigned {
@@ -395,8 +454,14 @@
     box-sizing: border-box;
     transition: border-color 0.15s;
 
-    &:focus { outline: none; border-color: var(--accent-border); }
-    &::placeholder { color: var(--text); font-weight: 400; }
+    &:focus {
+        outline: none;
+        border-color: var(--accent-border);
+    }
+    &::placeholder {
+        color: var(--text);
+        font-weight: 400;
+    }
 }
 
 .textarea {
@@ -413,8 +478,14 @@
     font-family: inherit;
     transition: border-color 0.15s;
 
-    &:focus { outline: none; border-color: var(--accent-border); }
-    &::placeholder { color: var(--text); font-weight: 400; }
+    &:focus {
+        outline: none;
+        border-color: var(--accent-border);
+    }
+    &::placeholder {
+        color: var(--text);
+        font-weight: 400;
+    }
 }
 
 .formActions {
@@ -435,12 +506,20 @@
     font-weight: 600;
     cursor: pointer;
     border: 2px solid transparent;
-    transition: background 0.15s, border-color 0.15s, opacity 0.15s;
+    transition:
+        background 0.15s,
+        border-color 0.15s,
+        opacity 0.15s;
     white-space: nowrap;
 
-    svg { font-size: 18px !important; }
+    svg {
+        font-size: 18px !important;
+    }
 
-    &:disabled { opacity: 0.5; cursor: not-allowed; }
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
 }
 
 .primaryBtn {
@@ -449,7 +528,9 @@
     color: #fff;
     border-color: var(--accent);
 
-    &:hover:not(:disabled) { opacity: 0.88; }
+    &:hover:not(:disabled) {
+        opacity: 0.88;
+    }
 }
 
 .secondaryBtn {
@@ -458,7 +539,10 @@
     color: var(--text-h);
     border-color: var(--border);
 
-    &:hover:not(:disabled) { background: var(--accent-bg); border-color: var(--accent-border); }
+    &:hover:not(:disabled) {
+        background: var(--accent-bg);
+        border-color: var(--accent-border);
+    }
 }
 
 .approveBtn {
@@ -467,7 +551,9 @@
     color: #fff;
     border-color: #22c55e;
 
-    &:hover:not(:disabled) { opacity: 0.88; }
+    &:hover:not(:disabled) {
+        opacity: 0.88;
+    }
 }
 
 .rejectBtn {
@@ -476,7 +562,10 @@
     color: #ef4444;
     border-color: #fecaca;
 
-    &:hover:not(:disabled) { background: #fef2f2; border-color: #ef4444; }
+    &:hover:not(:disabled) {
+        background: #fef2f2;
+        border-color: #ef4444;
+    }
 }
 
 // ─── Comments ──────────────────────────────────────────────────────────────────
@@ -540,11 +629,18 @@
     background: transparent;
     color: var(--text);
     cursor: pointer;
-    transition: background 0.15s, color 0.15s;
+    transition:
+        background 0.15s,
+        color 0.15s;
 
-    svg { font-size: 16px !important; }
+    svg {
+        font-size: 16px !important;
+    }
 
-    &:hover { background: #fef2f2; color: #ef4444; }
+    &:hover {
+        background: #fef2f2;
+        color: #ef4444;
+    }
 }
 
 .commentContent {
