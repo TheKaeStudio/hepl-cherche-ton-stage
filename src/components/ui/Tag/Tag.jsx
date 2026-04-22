@@ -52,7 +52,7 @@ export default function Tag({ icon: Icon, background, color, children, status, g
     }
 
     return (
-        <li style={{ ...(background && { background }), ...(color && { color, borderColor: color }) }}>
+        <li className="tag" style={{ ...(background && { background }), ...(color && { color, borderColor: color }) }}>
             {Icon && <Icon />}
             <p style={color ? { color } : undefined}>{children}</p>
         </li>

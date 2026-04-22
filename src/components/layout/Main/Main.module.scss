@@ -1,4 +1,4 @@
-main {
+.main {
     width: 100%;
     min-width: 0;
     background: var(--bg);
@@ -25,7 +25,7 @@ main {
 }
 
 @media (max-width: 900px) {
-    main {
+    .main {
         border-left: none;
 
         & > div > section {

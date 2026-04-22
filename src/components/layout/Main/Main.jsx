@@ -3,7 +3,7 @@ import StatusBar from "@components/layout/StatusBar/StatusBar"
 
 export default function Main({ children }) {
     return (
-        <main>
+        <main className="main">
             <StatusBar />
             <div>
                 {children}
