@@ -3,8 +3,8 @@
     align-items: center;
     justify-content: center;
     min-height: 100vh;
+    width: 100%;
     padding: 24px;
-    background: var(--bg-2);
 }
 
 .loading {
@@ -25,11 +25,17 @@
     gap: 16px;
     text-align: center;
 
-    &.success .icon { color: #22c55e; }
-    &.error   .icon { color: #ef4444; }
+    &.success .icon {
+        color: #22c55e;
+    }
+    &.error .icon {
+        color: #ef4444;
+    }
 }
 
-.icon { font-size: 52px !important; }
+.icon {
+    font-size: 52px !important;
+}
 
 .title {
     font-size: 24px;
@@ -55,5 +61,7 @@
     text-decoration: none;
     transition: opacity 0.15s;
 
-    &:hover { opacity: 0.85; }
+    &:hover {
+        opacity: 0.85;
+    }
 }
