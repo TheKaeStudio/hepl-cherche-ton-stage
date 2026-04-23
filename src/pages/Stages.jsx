@@ -107,7 +107,6 @@ export default function Stages() {
                     <DataTable.Header sortKey={sortKey} sortDir={sortDir} onSort={handleSort}>
                         <DataTable.Row>
                             <DataTable.SortableCell column="student">Étudiant</DataTable.SortableCell>
-                            <DataTable.Cell>Titre</DataTable.Cell>
                             <DataTable.SortableCell column="company">Entreprise</DataTable.SortableCell>
                             <DataTable.Cell>Groupe</DataTable.Cell>
                             <DataTable.Cell>Durée</DataTable.Cell>
@@ -121,7 +120,6 @@ export default function Stages() {
                                 <DataTable.UserCell user={stage.student}>
                                     {stage.student?.name ?? "—"}
                                 </DataTable.UserCell>
-                                <DataTable.Cell>{stage.title}</DataTable.Cell>
                                 <DataTable.Cell truncate>{stage.company?.name ?? "—"}</DataTable.Cell>
                                 <DataTable.Cell>
                                     {stage.group
@@ -157,7 +155,7 @@ export default function Stages() {
                 isOpen={!!deleteTarget}
                 onClose={() => setDeleteTarget(null)}
                 onConfirm={handleDelete}
-                message={`Supprimer le stage "${deleteTarget?.title}" ?`}
+                message={`Supprimer le stage de "${deleteTarget?.student?.name}"`}
             />
         </>
     );
