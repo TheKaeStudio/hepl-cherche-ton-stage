@@ -36,7 +36,9 @@ export default function Entreprises() {
     const [showCreate,      setShowCreate]      = useState(false);
     const [showSecteurs,    setShowSecteurs]    = useState(false);
     const [deleteTarget,    setDeleteTarget]    = useState(null);
-    const [accessLink,      setAccessLink]      = useState(null);
+    const [accessTarget,    setAccessTarget]    = useState(null);
+    const [linkCreating,    setLinkCreating]    = useState(false);
+    const [linkError,       setLinkError]       = useState(false);
     const [sortKey,         setSortKey]         = useState(null);
     const [sortDir,         setSortDir]         = useState("asc");
     const [showFilter,      setShowFilter]      = useState(false);
@@ -56,13 +58,26 @@ export default function Entreprises() {
         setCompanies((prev) => prev.filter((c) => c.id !== target.id));
     }
 
-    async function handleGiveAccess(company) {
+    function handleGiveAccess(company) {
+        setLinkError(false);
+        setAccessTarget(company);
+    }
+
+    async function handleCreateLink() {
+        setLinkCreating(true);
+        setLinkError(false);
         try {
-            const result = await giveAccess(company.id);
+            const result = await giveAccess(accessTarget.id);
             const key    = result?.key;
-            setAccessLink({ company, link: key ? `${window.location.origin}/company/acces?key=${key}` : null });
+            if (key) {
+                const invite = { key, createdAt: new Date().toISOString(), used: false };
+                setAccessTarget((prev) => ({ ...prev, invite }));
+                setCompanies((prev) => prev.map((c) => c.id === accessTarget.id ? { ...c, invite } : c));
+            }
         } catch {
-            setAccessLink({ company, link: null, error: true });
+            setLinkError(true);
+        } finally {
+            setLinkCreating(false);
         }
     }
 
@@ -188,23 +203,45 @@ export default function Entreprises() {
                 onConfirm={handleDelete}
                 message={`Supprimer l'entreprise "${deleteTarget?.name}" ?`}
             />
-            <Modal isOpen={!!accessLink} onClose={() => setAccessLink(null)} title={`Accès — ${accessLink?.company?.name ?? ""}`} size="sm">
-                {accessLink?.error ? (
-                    <p style={{ color: "#ef4444", fontSize: "14px" }}>Erreur lors de la génération du lien.</p>
-                ) : accessLink?.link ? (
-                    <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                        <p style={{ fontSize: "13px", color: "var(--text)" }}>
+            <Modal
+                isOpen={!!accessTarget}
+                onClose={() => { setAccessTarget(null); setLinkError(false); }}
+                title={`Accès — ${accessTarget?.name ?? ""}`}
+                size="sm"
+            >
+                {linkError && (
+                    <p style={{ color: "#ef4444", fontSize: "14px", marginBottom: "12px" }}>
+                        Erreur lors de la génération du lien.
+                    </p>
+                )}
+                {accessTarget?.invite?.key ? (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                        <p style={{ fontSize: "13px", color: "var(--text)", margin: 0 }}>
                             Partagez ce lien avec l'entreprise pour qu'elle puisse modifier sa fiche :
                         </p>
                         <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                            <input readOnly value={accessLink.link} style={{ flex: 1, padding: "10px 12px", borderRadius: "10px", border: "2px solid var(--border)", background: "var(--bg-alt, var(--bg))", fontSize: "13px", color: "var(--text-h)", fontFamily: "monospace" }} />
-                            <button onClick={() => navigator.clipboard.writeText(accessLink.link)} style={{ padding: "10px 16px", borderRadius: "10px", border: "2px solid var(--border)", background: "var(--bg)", cursor: "pointer", fontSize: "13px", fontWeight: 700, color: "var(--text-h)", fontFamily: "var(--sans)" }}>
+                            <input
+                                readOnly
+                                value={`${window.location.origin}/company/acces?key=${accessTarget.invite.key}`}
+                                style={{ flex: 1, padding: "10px 12px", borderRadius: "10px", border: "2px solid var(--border)", background: "var(--bg-alt, var(--bg))", fontSize: "13px", color: "var(--text-h)", fontFamily: "monospace" }}
+                            />
+                            <ActionButton onClick={() => navigator.clipboard.writeText(`${window.location.origin}/company/acces?key=${accessTarget.invite.key}`)}>
                                 Copier
-                            </button>
+                            </ActionButton>
                         </div>
+                        <ActionButton filled onClick={handleCreateLink} disabled={linkCreating}>
+                            {linkCreating ? "Génération…" : "Recréer un lien"}
+                        </ActionButton>
                     </div>
                 ) : (
-                    <p style={{ fontSize: "14px", color: "var(--text)" }}>Lien généré, mais format inconnu.</p>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                        <p style={{ fontSize: "13px", color: "var(--text)", margin: 0 }}>
+                            Aucun lien d'accès actif pour cette entreprise.
+                        </p>
+                        <ActionButton filled onClick={handleCreateLink} disabled={linkCreating}>
+                            {linkCreating ? "Génération…" : "Créer un lien"}
+                        </ActionButton>
+                    </div>
                 )}
             </Modal>
         </>

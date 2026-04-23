@@ -47,9 +47,9 @@ export function normalizeInternship(i) {
     const primaryStudent = i.students?.[0];
     const teacher        = i.assignedTeacher;
 
-    const companyName = i.company?.name
-        ?? sheet.externalCompanyName
-        ?? null;
+    const companyName = sheet.companyType === "external"
+        ? (sheet.externalCompanyName ?? null)
+        : (i.company?.name ?? null);
 
     const companyWebsite = i.company?.website
         ?? sheet.externalCompanyWebsite
