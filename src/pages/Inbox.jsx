@@ -49,11 +49,11 @@ export default function Inbox() {
                     <p>{unreadCount > 0 ? `${unreadCount} message(s) non lu(s).` : "Aucun message non lu."}</p>
                 </div>
                 {!loading && messages.length === 0 && (
-                    <p style={{ padding: "24px 0", color: "var(--text)", fontSize: "14px" }}>Aucun message.</p>
+                    <p className={styles.emptyText}>Aucun message.</p>
                 )}
                 {(loading || messages.length > 0) && (
                     <ul className={styles.list}>
-                        {loading && <li style={{ padding: "24px", color: "var(--text)", fontSize: "14px" }}>Chargement…</li>}
+                        {loading && <li className={styles.loadingItem}>Chargement…</li>}
                         {messages.map((msg) => {
                             const isUnread = !msg.read;
                             return (

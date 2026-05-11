@@ -11,6 +11,13 @@
     overflow-x: auto;
 }
 
+.loadingCell {
+    padding: 32px;
+    text-align: center;
+    color: var(--text);
+    font-size: 14px;
+}
+
 .table {
     width: 100%;
     border-collapse: collapse;

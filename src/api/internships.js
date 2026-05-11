@@ -42,6 +42,10 @@ function normalizeCompany(c) {
     };
 }
 
+/**
+ * Normalise un stage reçu de l'API vers le format interne.
+ * @param {object} i - Stage brut de l'API.
+ */
 export function normalizeInternship(i) {
     const sheet          = i.sheet ?? {};
     const primaryStudent = i.students?.[0];
@@ -72,7 +76,6 @@ export function normalizeInternship(i) {
         isLate,
         deadline:    i.deadline ?? null,
 
-        // People
         student:     normalizeUser(primaryStudent),
         students:    (i.students ?? []).map(normalizeUser),
         group:       i.group?.name  ?? primaryStudent?.group?.name ?? null,
@@ -81,14 +84,12 @@ export function normalizeInternship(i) {
         teacherName: teacher ? `${teacher.firstname ?? ""} ${teacher.lastname ?? ""}`.trim() : null,
         teacherId:   teacher?._id ?? null,
 
-        // Company
         company:             normalizeCompany(i.company),
         companyName,
         companyWebsite,
         sheetCompanyType:    sheet.companyType ?? null,
         externalCompanyName: sheet.externalCompanyName ?? null,
 
-        // Dates + supervisor
         startDate:    sheet.startDate   ?? null,
         endDate:      sheet.endDate     ?? null,
         supervisor:   sheet.companyTutor ?? null,
@@ -96,19 +97,20 @@ export function normalizeInternship(i) {
         description:  sheet.description ?? null,
         submittedAt:  sheet.submittedAt ?? null,
 
-        // Documents
         conventionUrl:        i.documents?.convention        ?? null,
         reportUrl:            i.documents?.report            ?? null,
         docsSubmittedAt:      i.documents?.submittedAt       ?? null,
         docsRejectionComment: i.documents?.rejectionComment  ?? null,
 
-        // Evaluation (sheet)
         evaluation:  i.evaluation ?? null,
 
         isGroupAssignment: i.isGroupAssignment ?? false,
     };
 }
 
+/**
+ * @param {{ page?: number, limit?: number }} [opts]
+ */
 export async function getInternships({ page, limit = 20 } = {}) {
     const params = page !== undefined ? { page, limit } : {};
     const { data } = await client.get("/internships", { params });
@@ -117,36 +119,61 @@ export async function getInternships({ page, limit = 20 } = {}) {
     return items;
 }
 
+/** @param {string} id */
 export async function getInternship(id) {
     const { data } = await client.get(`/internships/${id}`);
     return normalizeInternship(data.internship);
 }
 
+/** @param {object} payload */
 export async function createInternship(payload) {
     const { data } = await client.post("/internships/create", payload);
     return normalizeInternship(data.internship);
 }
 
+/**
+ * @param {string} id
+ * @param {object} payload
+ */
 export async function updateInternship(id, payload) {
     const { data } = await client.put(`/internships/update/${id}`, payload);
     return normalizeInternship(data.internship);
 }
 
+/**
+ * Sauvegarde la fiche de stage (brouillon).
+ * @param {string} id
+ * @param {object} sheet
+ */
 export async function updateSheet(id, sheet) {
     const { data } = await client.put(`/internships/${id}/sheet`, sheet);
     return normalizeInternship(data.internship);
 }
 
+/**
+ * Soumet la fiche de stage.
+ * @param {string} id
+ */
 export async function submitSheet(id) {
     const { data } = await client.post(`/internships/${id}/submit`);
     return normalizeInternship(data.internship);
 }
 
+/**
+ * Valide ou rejette une fiche soumise.
+ * @param {string} id
+ * @param {{ status: "validated"|"rejected", comment?: string }} opts
+ */
 export async function validateSheet(id, { status, comment }) {
     const { data } = await client.put(`/internships/${id}/validate`, { status, comment });
     return normalizeInternship(data.internship);
 }
 
+/**
+ * Soumet les documents PDF (convention + rapport).
+ * @param {string} id
+ * @param {FormData} formData
+ */
 export async function submitDocs(id, formData) {
     const { data } = await client.post(`/internships/${id}/submit-docs`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -154,11 +181,17 @@ export async function submitDocs(id, formData) {
     return normalizeInternship(data.internship);
 }
 
+/**
+ * Confirme ou rejette les documents soumis.
+ * @param {string} id
+ * @param {{ status: "completed"|"docs_rejected", comment?: string }} opts
+ */
 export async function confirmDocs(id, { status, comment }) {
     const { data } = await client.put(`/internships/${id}/confirm-docs`, { status, comment });
     return normalizeInternship(data.internship);
 }
 
+/** @param {string} id */
 export async function deleteInternship(id) {
     await client.delete(`/internships/delete/${id}`);
 }
@@ -174,16 +207,25 @@ function normalizeComment(c) {
     };
 }
 
+/** @param {string} internshipId */
 export async function getComments(internshipId) {
     const { data } = await client.get(`/internships/${internshipId}/comments`);
     return data.comments.map(normalizeComment);
 }
 
+/**
+ * @param {string} internshipId
+ * @param {string} content
+ */
 export async function addComment(internshipId, content) {
     const { data } = await client.post(`/internships/${internshipId}/comments`, { content });
     return normalizeComment(data.comment);
 }
 
+/**
+ * @param {string} internshipId
+ * @param {string} commentId
+ */
 export async function deleteComment(internshipId, commentId) {
     await client.delete(`/internships/${internshipId}/comments/${commentId}`);
 }

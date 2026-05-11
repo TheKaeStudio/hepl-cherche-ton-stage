@@ -14,6 +14,10 @@ const ROLE_MAP_REVERSE = {
     enseignant: "teacher",
 };
 
+/**
+ * Normalise un utilisateur reçu de l'API vers le format interne.
+ * @param {object} u
+ */
 export function normalizeUser(u) {
     return {
         id:          u._id,
@@ -31,6 +35,10 @@ export function normalizeUser(u) {
     };
 }
 
+/**
+ * Récupère la liste des utilisateurs. Filtrable par rôle.
+ * @param {{ page?: number, limit?: number, role?: string }} [opts]
+ */
 export async function getUsers({ page, limit = 20, role } = {}) {
     const params = {};
     if (page !== undefined) { params.page = page; params.limit = limit; }
@@ -42,6 +50,10 @@ export async function getUsers({ page, limit = 20, role } = {}) {
     return items;
 }
 
+/**
+ * @param {string} id
+ * @param {object} payload
+ */
 export async function updateUser(id, payload) {
     const apiPayload = { ...payload };
     if (apiPayload.role) apiPayload.role = ROLE_MAP_REVERSE[apiPayload.role] ?? apiPayload.role;
@@ -49,15 +61,21 @@ export async function updateUser(id, payload) {
     return normalizeUser(data.user);
 }
 
+/**
+ * Modifie le profil de l'utilisateur connecté.
+ * @param {object} payload - Champs autorisés : photo, phone, firstname, lastname.
+ */
 export async function updateMe(payload) {
     const { data } = await client.put("/users/me", payload);
     return data.user;
 }
 
+/** @param {string} id */
 export async function deleteUser(id) {
     await client.delete(`/users/delete/${id}`);
 }
 
+/** Retire le groupe de tous les étudiants. */
 export async function clearAllGroups() {
     const { data } = await client.delete("/users/groups");
     return data;

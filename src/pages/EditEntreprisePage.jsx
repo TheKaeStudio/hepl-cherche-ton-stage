@@ -98,7 +98,7 @@ export default function EditEntreprisePage() {
         }
     }
 
-    if (loading) return <section><p style={{ padding: "40px", color: "var(--text)" }}>Chargement…</p></section>;
+    if (loading) return <section><p className={styles.loadingText}>Chargement…</p></section>;
 
     return (
         <section>

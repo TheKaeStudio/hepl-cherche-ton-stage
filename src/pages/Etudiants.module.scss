@@ -8,7 +8,7 @@
     padding: 12px 24px;
     border-radius: 12px;
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 600;
     cursor: pointer;
     font-family: var(--sans);
     transition: opacity 0.15s;
@@ -29,38 +29,12 @@
     color: #fff;
 }
 
-.menuWrap {
-    position: relative;
+.tagList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
-.dropMenu {
-    position: absolute;
-    top: calc(100% + 6px);
-    right: 0;
-    background: var(--card);
-    border: 1.5px solid var(--border);
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-    overflow: hidden;
-    z-index: 100;
-    min-width: 180px;
-    padding: 4px;
-
-    button {
-        display: block;
-        width: 100%;
-        text-align: left;
-        padding: 10px 16px;
-        font-size: 14px;
-        font-weight: 600;
-        color: var(--text-h);
-        background: none;
-        border: none;
-        cursor: pointer;
-        font-family: var(--sans);
-        border-radius: 8px;
-        transition: background 0.1s;
-
-        &:hover { background: var(--accent-bg); }
-    }
+.empty {
+    color: var(--text);
 }

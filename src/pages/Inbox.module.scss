@@ -21,7 +21,7 @@
 
     &:last-child { border-bottom: none; }
     &:hover { background: var(--accent-bg); }
-    &.unread .subject { font-weight: 700; }
+    &.unread .subject { font-weight: 600; }
 }
 
 .content {
@@ -41,7 +41,7 @@
 
 .sender {
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--text-h);
 }
 
@@ -87,7 +87,7 @@
 
 .msgSender {
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--text-h);
 }
 
@@ -102,6 +102,18 @@
     color: var(--text-h);
     line-height: 1.7;
     white-space: pre-wrap;
+}
+
+.emptyText,
+.loadingItem {
+    padding: 24px;
+    color: var(--text);
+    font-size: 14px;
+}
+
+.emptyText {
+    padding-left: 0;
+    padding-right: 0;
 }
 
 .replyArea {

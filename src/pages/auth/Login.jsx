@@ -4,6 +4,7 @@ import FormField from "@/components/ui/FormField/FormField";
 import { useAuth } from "@/contexts/AuthContext";
 import { signIn } from "@/api/auth";
 import styles from "./Login.module.scss";
+import logo from "@/assets/logo.png";
 
 export default function Login() {
     const { login } = useAuth();
@@ -25,7 +26,10 @@ export default function Login() {
     async function handleSubmit(ev) {
         ev.preventDefault();
         const e = validate();
-        if (Object.keys(e).length) { setErrors(e); return; }
+        if (Object.keys(e).length) {
+            setErrors(e);
+            return;
+        }
 
         setLoading(true);
         try {
@@ -47,13 +51,18 @@ export default function Login() {
     return (
         <div className={styles.page}>
             <div className={styles.header}>
-                <h1 className={styles.title}>Connexion</h1>
-                <p className={styles.subtitle}>
-                    Connectez-vous à votre compte pour accéder à la plateforme.
+                <img src={logo} alt="HEPL Logo" />
+                <h1 className={styles.subtitle}>
+                    Connectez-vous à HEPL - Cherche Ton Stage
+                </h1>
+                <p className={styles.title}>
+                    Trouver le stage qui vous convient le mieux
                 </p>
             </div>
             <form className={styles.form} onSubmit={handleSubmit} noValidate>
-                {errors.global && <p className={styles.globalError}>{errors.global}</p>}
+                {errors.global && (
+                    <p className={styles.globalError}>{errors.global}</p>
+                )}
                 <FormField
                     label="Adresse e-mail"
                     type="email"
@@ -74,13 +83,19 @@ export default function Login() {
                     autoComplete="current-password"
                     required
                 />
-                <button type="submit" className={styles.submit} disabled={loading}>
+                <button
+                    type="submit"
+                    className={styles.submit}
+                    disabled={loading}
+                >
                     {loading ? "Connexion…" : "Se connecter"}
                 </button>
             </form>
             <p className={styles.footer}>
                 Pas encore de compte ?{" "}
-                <Link to="/signup" className={styles.link}>Créer un compte</Link>
+                <Link to="/signup" className={styles.link}>
+                    Créer un compte
+                </Link>
             </p>
         </div>
     );

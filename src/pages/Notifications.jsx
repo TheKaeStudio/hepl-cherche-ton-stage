@@ -40,7 +40,7 @@ export default function Notifications() {
     return (
         <section>
             <div className="sectionHeader">
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <div className={styles.headerActions}>
                     <div>
                         <h2>Notifications</h2>
                         <p>{unread > 0 ? `${unread} notification(s) non lue(s).` : "Tout est à jour."}</p>
@@ -53,18 +53,17 @@ export default function Notifications() {
                 </div>
             </div>
             {!loading && notifications.length === 0 && (
-                <p style={{ padding: "24px 0", color: "var(--text)", fontSize: "14px" }}>Aucune notification.</p>
+                <p className={styles.emptyText}>Aucune notification.</p>
             )}
             <ul className={styles.list}>
-                {loading && <li style={{ padding: "24px", color: "var(--text)", fontSize: "14px" }}>Chargement…</li>}
+                {loading && <li className={styles.loadingItem}>Chargement…</li>}
                 {notifications.map((n) => {
                     const { Icon, color, background } = NOTIF_CONFIG[n.type] ?? {};
                     return (
                         <li
                             key={n.id}
-                            className={`${styles.item} ${!n.read ? styles.unread : ""}`}
+                            className={`${styles.item} ${!n.read ? styles.unread : ""} ${n.read ? styles.itemRead : ""}`}
                             onClick={() => handleMarkOne(n)}
-                            style={{ cursor: n.read ? "default" : "pointer" }}
                         >
                             <div className={styles.iconWrap} style={{ background, color }}>
                                 {Icon && <Icon />}

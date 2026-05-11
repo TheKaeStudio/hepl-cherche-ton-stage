@@ -94,9 +94,9 @@ export default function Recherche() {
                     }
                 />
                 {loading ? (
-                    <p style={{ padding: "24px 0", color: "var(--text)", fontSize: "14px" }}>Chargement…</p>
+                    <p className={styles.statusText}>Chargement…</p>
                 ) : displayed.length === 0 ? (
-                    <p style={{ padding: "24px 0", color: "var(--text)", fontSize: "14px" }}>Aucune entreprise trouvée.</p>
+                    <p className={styles.statusText}>Aucune entreprise trouvée.</p>
                 ) : (
                     <div className={styles.companyList}>
                         {displayed.map((company) => (

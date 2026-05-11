@@ -3,6 +3,7 @@ import { useLocation, Routes, Route, Navigate } from "react-router-dom";
 import { SideMenuProvider } from "../components/layout/SideMenu/SideMenuContext";
 import { SavedProvider } from "../contexts/SavedContext";
 import { SecteurProvider } from "../contexts/SecteurContext";
+import { useAuth } from "../contexts/AuthContext";
 import SideMenu from "../components/layout/SideMenu/SideMenu";
 import Main from "../components/layout/Main/Main";
 
@@ -32,6 +33,7 @@ const modalRoutes = {
 
 export default function DashboardLayout() {
     const location = useLocation();
+    const { user } = useAuth();
     const background = location.state?.background;
     const modal = modalRoutes[location.pathname];
 
@@ -47,7 +49,7 @@ export default function DashboardLayout() {
                     <Route path="recherche" element={<Recherche />} />
                     <Route path="stages" element={<Stages />} />
                     <Route path="etudiants" element={<Etudiants />} />
-                    <Route path="entreprises" element={<Entreprises />} />
+                    <Route path="entreprises" element={user?.role === "limited" ? <Navigate to="/" replace /> : <Entreprises />} />
                     <Route path="entreprises/:id/modifier" element={<EditEntreprisePage />} />
                     <Route path="stages/:id" element={<StageDetailPage />} />
                     <Route path="utilisateurs" element={<Utilisateurs />} />

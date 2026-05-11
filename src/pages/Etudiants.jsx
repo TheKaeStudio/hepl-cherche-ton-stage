@@ -138,8 +138,8 @@ export default function Etudiants() {
                                 <DataTable.UserCell user={student}>{student.name}</DataTable.UserCell>
                                 <DataTable.Cell>
                                     {student.class
-                                        ? <ul style={{ listStyle: "none", padding: 0, margin: 0 }}><Tag group={{ name: student.class, color: student.groupColor }} /></ul>
-                                        : <span style={{ color: "var(--text)" }}>—</span>}
+                                        ? <ul className={styles.tagList}><Tag group={{ name: student.class, color: student.groupColor }} /></ul>
+                                        : <span className={styles.empty}>—</span>}
                                 </DataTable.Cell>
                                 <DataTable.Cell muted>{student.email}</DataTable.Cell>
                                 <DataTable.Actions

@@ -17,6 +17,8 @@ import SortIcon   from "@mui/icons-material/ImportExport";
 import FilterIcon from "@mui/icons-material/FilterList";
 import PlusIcon   from "@mui/icons-material/Add";
 
+import styles from "./Stages.module.scss";
+
 const STATUS_OPTIONS = [
     { value: "assigned",       label: "À remplir"  },
     { value: "submitted",      label: "En attente" },
@@ -123,8 +125,8 @@ export default function Stages() {
                                 <DataTable.Cell truncate>{stage.company?.name ?? "—"}</DataTable.Cell>
                                 <DataTable.Cell>
                                     {stage.group
-                                        ? <ul style={{ listStyle: "none", padding: 0, margin: 0 }}><Tag group={{ name: stage.group, color: stage.groupColor }} /></ul>
-                                        : <span style={{ color: "var(--text)" }}>—</span>}
+                                        ? <ul className={styles.tagList}><Tag group={{ name: stage.group, color: stage.groupColor }} /></ul>
+                                        : <span className={styles.empty}>—</span>}
                                 </DataTable.Cell>
                                 <DataTable.Cell muted>
                                     {stage.startDate ? new Date(stage.startDate).toLocaleDateString("fr-BE", { day: "numeric", month: "short" }) : "—"}

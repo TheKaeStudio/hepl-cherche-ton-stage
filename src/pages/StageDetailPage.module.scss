@@ -43,7 +43,7 @@
 
 .title {
     font-size: 24px;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--text-h);
     margin: 0;
 }
@@ -53,7 +53,7 @@
     align-items: center;
     gap: 4px;
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 600;
     color: #f97316;
     background: #fff7ed;
     border: 1px solid #fed7aa;
@@ -94,7 +94,7 @@
 
     dt {
         font-size: 11px;
-        font-weight: 700;
+        font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.05em;
         color: var(--text);
@@ -170,14 +170,14 @@
     background: var(--accent-bg);
     border: 2px solid var(--accent-border);
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--accent);
     flex-shrink: 0;
 }
 
 .taskTitle {
     font-size: 17px;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--text-h);
     margin: 0;
     flex: 1;
@@ -188,7 +188,7 @@
     align-items: center;
     gap: 4px;
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 600;
     color: #22c55e;
     background: #f0fdf4;
     border: 1px solid #bbf7d0;
@@ -209,7 +209,7 @@
     align-items: center;
     gap: 4px;
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 600;
     color: #3b82f6;
     background: #eff6ff;
     border: 1px solid #bfdbfe;
@@ -334,7 +334,7 @@
 
 .required {
     color: #ef4444;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 // ─── Doc links ─────────────────────────────────────────────────────────────────
@@ -398,7 +398,7 @@
 
 .fieldLabel {
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--text);
@@ -427,7 +427,7 @@
 
 .companyAssigned {
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--text-h);
     padding: 10px 14px;
     background: var(--accent-bg);
@@ -572,7 +572,7 @@
 
 .commentsTitle {
     font-size: 17px;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--text-h);
     margin: 0;
 }
@@ -602,7 +602,7 @@
 
 .commentAuthor {
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--text-h);
 }
 

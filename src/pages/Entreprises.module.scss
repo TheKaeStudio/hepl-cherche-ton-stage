@@ -1,34 +1,40 @@
-.menuWrap {
-    position: relative;
+.tagList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
-.dropMenu {
-    position: absolute;
-    top: calc(100% + 6px);
-    right: 0;
-    background: var(--card);
-    border: 1.5px solid var(--border);
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-    z-index: 100;
-    min-width: 200px;
-    padding: 4px;
+.accessError {
+    color: var(--error, #ef4444);
+    font-size: 14px;
+    margin-bottom: 12px;
+}
 
-    button {
-        display: block;
-        width: 100%;
-        text-align: left;
-        padding: 10px 16px;
-        font-size: 14px;
-        font-weight: 600;
-        color: var(--text-h);
-        background: none;
-        border: none;
-        cursor: pointer;
-        font-family: var(--sans);
-        border-radius: 8px;
-        transition: background 0.1s;
+.accessBody {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
 
-        &:hover { background: var(--accent-bg); }
-    }
+.accessHint {
+    font-size: 13px;
+    color: var(--text);
+    margin: 0;
+}
+
+.accessRow {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.accessInput {
+    flex: 1;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 2px solid var(--border);
+    background: var(--bg-alt, var(--bg));
+    font-size: 13px;
+    color: var(--text-h);
+    font-family: monospace;
 }

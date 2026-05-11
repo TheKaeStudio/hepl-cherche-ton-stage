@@ -163,11 +163,12 @@ export default function Entreprises() {
                         {displayed.map((company) => {
                             const sectorObj = company.sector ?? sectors.find((s) => s.name === company.domain) ?? null;
                             const lieu      = company.province ?? company.country ?? "—";
+                            const canManage = user?.role === "admin" || user?.role === "manager";
                             return (
                                 <DataTable.Row key={company.id}>
                                     <DataTable.Cell>{company.name}</DataTable.Cell>
                                     <DataTable.Cell>
-                                        <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                                        <ul className={styles.tagList}>
                                             <Tag sector={sectorObj} />
                                         </ul>
                                     </DataTable.Cell>
@@ -176,8 +177,8 @@ export default function Entreprises() {
                                     <DataTable.Actions
                                         onView={() => setSelectedCompany(company)}
                                         onEdit={() => navigate(`/entreprises/${company.id}/modifier`)}
-                                        onGiveAccess={() => handleGiveAccess(company)}
-                                        onDelete={() => setDeleteTarget(company)}
+                                        onGiveAccess={canManage ? () => handleGiveAccess(company) : undefined}
+                                        onDelete={canManage ? () => setDeleteTarget(company) : undefined}
                                     />
                                 </DataTable.Row>
                             );
@@ -210,20 +211,20 @@ export default function Entreprises() {
                 size="sm"
             >
                 {linkError && (
-                    <p style={{ color: "#ef4444", fontSize: "14px", marginBottom: "12px" }}>
+                    <p className={styles.accessError}>
                         Erreur lors de la génération du lien.
                     </p>
                 )}
                 {accessTarget?.invite?.key ? (
-                    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                        <p style={{ fontSize: "13px", color: "var(--text)", margin: 0 }}>
+                    <div className={styles.accessBody}>
+                        <p className={styles.accessHint}>
                             Partagez ce lien avec l'entreprise pour qu'elle puisse modifier sa fiche :
                         </p>
-                        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                        <div className={styles.accessRow}>
                             <input
                                 readOnly
+                                className={styles.accessInput}
                                 value={`${window.location.origin}/company/acces?key=${accessTarget.invite.key}`}
-                                style={{ flex: 1, padding: "10px 12px", borderRadius: "10px", border: "2px solid var(--border)", background: "var(--bg-alt, var(--bg))", fontSize: "13px", color: "var(--text-h)", fontFamily: "monospace" }}
                             />
                             <ActionButton onClick={() => navigator.clipboard.writeText(`${window.location.origin}/company/acces?key=${accessTarget.invite.key}`)}>
                                 Copier
@@ -234,8 +235,8 @@ export default function Entreprises() {
                         </ActionButton>
                     </div>
                 ) : (
-                    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                        <p style={{ fontSize: "13px", color: "var(--text)", margin: 0 }}>
+                    <div className={styles.accessBody}>
+                        <p className={styles.accessHint}>
                             Aucun lien d'accès actif pour cette entreprise.
                         </p>
                         <ActionButton filled onClick={handleCreateLink} disabled={linkCreating}>

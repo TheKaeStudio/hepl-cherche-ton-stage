@@ -9,15 +9,22 @@
 .brand {
     width: 380px;
     min-width: 45%;
-    background: #ebebeb;
+    background: url('../assets/auth-background.png') no-repeat center;
+    background-size: cover;
     display: flex;
     flex-direction: column;
-    padding: 40px;
+    padding: 24px;
     position: sticky;
     top: 0;
     align-self: flex-start;
     height: 100%;
     border-radius: 48px;
+    align-items: center;
+    justify-content: center;
+
+    & > img {
+        width: 100%;
+    }
 }
 
 .logo {
@@ -35,7 +42,7 @@
 
 .title {
     font-size: 28px;
-    font-weight: 800;
+    font-weight: 600;
     color: #fff;
     line-height: 1.2;
 }
@@ -71,13 +78,14 @@
     .brand {
         width: 100%;
         min-width: 0;
-        height: auto;
+        height: 500px;
         min-height: unset;
         position: relative;
         padding: 28px 24px;
         flex-direction: row;
         align-items: center;
         gap: 16px;
+        border-radius: 16px;
     }
 
     .logo {

@@ -7,7 +7,7 @@ import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
 import Activate from "./pages/auth/Activate";
 import VerifyEmail from "./pages/auth/VerifyEmail";
-import CompanyAcces from "./pages/auth/CompanyAcces";
+import CompanyAcces from "./pages/auth/CompanyAccess";
 import ErrorPage from "./pages/ErrorPage";
 import RouteErrorPage from "./pages/RouteErrorPage";
 

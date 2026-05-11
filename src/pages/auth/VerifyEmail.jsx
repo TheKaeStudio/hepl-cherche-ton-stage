@@ -6,7 +6,7 @@ export default function VerifyEmail() {
     return (
         <div className={styles.page}>
             <div className={styles.card}>
-                <MarkEmailUnreadIcon className={styles.icon} style={{ color: "#f97316" }} />
+                <MarkEmailUnreadIcon className={`${styles.icon} ${styles.iconOrange}`} />
                 <h1 className={styles.title}>Compte non vérifié</h1>
                 <p className={styles.subtitle}>
                     Votre compte n'a pas encore été activé. Vérifiez votre boîte e-mail

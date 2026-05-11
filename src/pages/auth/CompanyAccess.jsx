@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { getAccessByKey } from "@/api/companies";
 import { useAuth } from "@/contexts/AuthContext";
+import styles from "./CompanyAccess.module.scss";
 
 function decodeJWT(token) {
     try {
@@ -38,15 +39,15 @@ export default function CompanyAcces() {
 
     if (error) {
         return (
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "100vh", gap: "1rem", fontFamily: "sans-serif" }}>
-                <p style={{ color: "#ef4444", fontWeight: 600 }}>{error}</p>
-                <a href="/login" style={{ color: "#3b82f6" }}>Retour à la connexion</a>
+            <div className={`${styles.screen} ${styles.errorScreen}`}>
+                <p className={styles.errorText}>{error}</p>
+                <a href="/login" className={styles.backLink}>Retour à la connexion</a>
             </div>
         );
     }
 
     return (
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", fontFamily: "sans-serif" }}>
+        <div className={styles.screen}>
             <p>Vérification de votre accès…</p>
         </div>
     );

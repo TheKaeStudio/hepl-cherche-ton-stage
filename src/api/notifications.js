@@ -19,6 +19,10 @@ function normalizeNotification(n) {
     };
 }
 
+/**
+ * Récupère les notifications de l'utilisateur connecté.
+ * @param {{ page?: number, limit?: number }} [opts]
+ */
 export async function getNotifications({ page, limit = 20 } = {}) {
     const params = page !== undefined ? { page, limit } : {};
     const { data } = await client.get("/notifications", { params });
@@ -27,10 +31,12 @@ export async function getNotifications({ page, limit = 20 } = {}) {
     return items;
 }
 
+/** @param {string} id */
 export async function markNotificationRead(id) {
     await client.put(`/notifications/${id}/read`);
 }
 
+/** Marque toutes les notifications comme lues. */
 export async function markAllNotificationsRead() {
     await client.put("/notifications/read-all");
 }

@@ -3,7 +3,8 @@ import ActionButton from "@/components/ui/ActionButton/ActionButton";
 import styles from "./DropdownActionMenu.module.scss";
 
 export default function DropdownActionMenu({ icon, items, filled = true }) {
-    const [open, setOpen] = useState(false);
+    const [open,      setOpen]      = useState(false);
+    const [openRight, setOpenRight] = useState(false);
     const ref = useRef(null);
 
     useEffect(() => {
@@ -14,16 +15,24 @@ export default function DropdownActionMenu({ icon, items, filled = true }) {
         return () => document.removeEventListener("mousedown", handleOutside);
     }, []);
 
+    function handleToggle() {
+        if (!open && ref.current) {
+            const { left } = ref.current.getBoundingClientRect();
+            setOpenRight(left < 220);
+        }
+        setOpen((v) => !v);
+    }
+
     return (
         <div ref={ref} className={styles.wrap}>
-            <ActionButton icon={icon} filled={filled} onClick={() => setOpen((v) => !v)} />
+            <ActionButton icon={icon} filled={filled} onClick={handleToggle} />
             {open && (
-                <div className={styles.menu}>
+                <div className={`${styles.menu} ${openRight ? styles.menuRight : ""}`}>
                     {items.map((item, i) => (
                         <button
                             key={i}
+                            className={item.danger ? styles.dangerBtn : undefined}
                             onClick={() => { setOpen(false); item.onClick(); }}
-                            style={item.danger ? { color: "#ef4444" } : undefined}
                             disabled={item.disabled}
                         >
                             {item.label}

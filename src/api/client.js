@@ -1,3 +1,8 @@
+/**
+ * Instance Axios partagée pour toutes les requêtes API.
+ * - Ajoute automatiquement le Bearer token depuis localStorage.
+ * - Redirige vers /login sur 401, sauf pour le rôle "limited".
+ */
 import axios from "axios";
 
 const client = axios.create({
@@ -11,7 +16,6 @@ client.interceptors.request.use((config) => {
     return config;
 });
 
-// Auto-logout on 401 (token expired / missing)
 client.interceptors.response.use(
     (response) => response,
     (error) => {

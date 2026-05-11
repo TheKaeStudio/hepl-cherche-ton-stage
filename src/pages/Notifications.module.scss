@@ -54,6 +54,34 @@
     font-weight: 500;
 }
 
+.itemRead {
+    cursor: default;
+}
+
+.headerActions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.emptyText {
+    padding: 24px 0;
+    color: var(--text);
+    font-size: 14px;
+}
+
+.loadingItem {
+    padding: 24px;
+    color: var(--text);
+    font-size: 14px;
+}
+
+.statusText {
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: var(--text);
+}
+
 .dot {
     width: 8px;
     height: 8px;

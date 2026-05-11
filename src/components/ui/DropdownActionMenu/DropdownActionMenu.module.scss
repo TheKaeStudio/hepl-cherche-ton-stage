@@ -34,3 +34,12 @@
         &:disabled { opacity: 0.4; cursor: not-allowed; }
     }
 }
+
+.menuRight {
+    right: auto;
+    left: 0;
+}
+
+.dangerBtn {
+    color: var(--error, #ef4444) !important;
+}

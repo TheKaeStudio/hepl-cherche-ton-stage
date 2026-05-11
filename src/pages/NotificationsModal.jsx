@@ -72,7 +72,7 @@ export default function NotificationsModal() {
                 ) : null
             }
         >
-            <p style={{ marginBottom: "12px", fontSize: "14px", color: "var(--text)" }}>
+            <p className={styles.statusText}>
                 {loading ? "Chargement…" : unread > 0 ? `${unread} non lue(s).` : "Tout est à jour."}
             </p>
             <ul className={styles.list}>

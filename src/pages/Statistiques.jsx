@@ -83,7 +83,7 @@ export default function Statistiques() {
             </div>
 
             {loading ? (
-                <p style={{ color: "var(--text)", fontSize: "14px" }}>Chargement…</p>
+                <p className={styles.loadingText}>Chargement…</p>
             ) : (
                 <>
                     <div className={styles.summaryGrid}>

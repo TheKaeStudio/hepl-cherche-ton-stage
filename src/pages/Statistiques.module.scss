@@ -36,7 +36,7 @@
 
 .statValue {
     font-size: 26px;
-    font-weight: 800;
+    font-weight: 600;
     color: var(--text-h);
     line-height: 1;
     margin-bottom: 2px;
@@ -68,7 +68,7 @@
 
 .chartTitle {
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--text-h);
 }
 
@@ -111,7 +111,12 @@
 
 .barValue {
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--text);
     text-align: right;
+}
+
+.loadingText {
+    color: var(--text);
+    font-size: 14px;
 }
