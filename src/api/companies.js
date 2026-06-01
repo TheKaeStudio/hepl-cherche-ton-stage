@@ -18,6 +18,9 @@ export function normalizeCompany(c) {
         sectorId:    c.sector?._id   ?? null,
         sectorColor: c.sector?.color ?? null,
         sector:      c.sector        ?? null,
+        domains:      Array.isArray(c.domains) ? c.domains : [],
+        tags:         Array.isArray(c.tags)    ? c.tags    : [],
+        customValues: c.customValues && typeof c.customValues === "object" ? c.customValues : {},
         province:    c.address?.province ?? null,
         country:     c.address?.country  ?? null,
         address:     c.address ?? null,
@@ -38,12 +41,20 @@ export function normalizeCompany(c) {
  * @param {{ page?: number, limit?: number }} [opts]
  * @returns {Promise<object[]|{ items: object[], total: number, hasMore: boolean }>}
  */
-export async function getCompanies({ page, limit = 20 } = {}) {
-    const params = page !== undefined ? { page, limit } : {};
+export async function getCompanies({ page, limit = 20, search } = {}) {
+    const params = {};
+    if (page !== undefined) { params.page = page; params.limit = limit; }
+    if (search)             params.search = search;
     const { data } = await client.get("/company", { params });
     const items = data.companies.map(normalizeCompany);
     if (page !== undefined) return { items, total: data.total ?? items.length, hasMore: data.hasMore ?? false };
     return items;
+}
+
+/** Retourne les domaines et tags distincts de toutes les entreprises. */
+export async function getCompanyMeta() {
+    const { data } = await client.get("/company/meta");
+    return { domains: data.domains ?? [], tags: data.tags ?? [] };
 }
 
 /**

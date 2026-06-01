@@ -7,6 +7,12 @@
     flex-direction: column;
     min-height: 100dvh;
     overflow-x: hidden;
+    margin-left: 280px;
+    transition: margin-left 0.25s ease;
+
+    &.collapsed {
+        margin-left: 68px;
+    }
 
     & > div {
         flex: 1;
@@ -27,6 +33,11 @@
 @media (max-width: 900px) {
     .main {
         border-left: none;
+        margin-left: 0;
+
+        &.collapsed {
+            margin-left: 0;
+        }
 
         & > div > section {
             padding: 24px 20px;

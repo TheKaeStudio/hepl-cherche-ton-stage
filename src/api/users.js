@@ -39,10 +39,11 @@ export function normalizeUser(u) {
  * Récupère la liste des utilisateurs. Filtrable par rôle.
  * @param {{ page?: number, limit?: number, role?: string }} [opts]
  */
-export async function getUsers({ page, limit = 20, role } = {}) {
+export async function getUsers({ page, limit = 20, role, search } = {}) {
     const params = {};
     if (page !== undefined) { params.page = page; params.limit = limit; }
-    if (role) params.role = ROLE_MAP_REVERSE[role] ?? role;
+    if (role)   params.role   = ROLE_MAP_REVERSE[role] ?? role;
+    if (search) params.search = search;
     const { data } = await client.get("/users", { params });
     const list = data.users ?? data.data ?? data;
     const items = (Array.isArray(list) ? list : []).map(normalizeUser);

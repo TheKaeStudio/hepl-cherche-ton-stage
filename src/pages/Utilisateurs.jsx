@@ -1,13 +1,13 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { ROLE_LABEL } from "@/data/mock";
 import { getUsers, deleteUser } from "@/api/users";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
+import { useDebounce } from "@/hooks/useDebounce";
 import SearchBar from "@/components/ui/SearchBar/SearchBar";
 import ActionButton from "@/components/ui/ActionButton/ActionButton";
 import Toolbar from "@/components/layout/Toolbar/Toolbar";
 import DataTable from "@/components/dataTable/DataTable";
 import LoadMore from "@/components/ui/LoadMore/LoadMore";
-import SendMessageModal from "./SendMessageModal";
 import EditUserModal from "./EditUserModal";
 import UserSheet from "@/components/sheets/UserSheet";
 import DeleteConfirm from "@/components/ui/DeleteConfirm/DeleteConfirm";
@@ -15,7 +15,6 @@ import FilterModal from "./FilterModal";
 
 import SortIcon   from "@mui/icons-material/ImportExport";
 import FilterIcon from "@mui/icons-material/FilterList";
-import MessageIcon from "@mui/icons-material/MailOutlined";
 
 const FILTER_CONFIG = [
     {
@@ -31,10 +30,14 @@ const FILTER_CONFIG = [
 ];
 
 export default function Utilisateurs() {
-    const { items: users, loading, loadingMore, hasMore, total, loadMore, setItems: setUsers } =
-        usePaginatedList((params) => getUsers(params), 20);
+    const [search, setSearch] = useState("");
+    const debouncedSearch = useDebounce(search, 500);
 
-    const [showMessage,  setShowMessage]  = useState(false);
+    const { items: users, loading, loadingMore, hasMore, total, loadMore, reset, setItems: setUsers } =
+        usePaginatedList((params) => getUsers({ ...params, search: debouncedSearch || undefined }), 20);
+
+    useEffect(() => { reset(); }, [debouncedSearch]);
+
     const [viewTarget,   setViewTarget]   = useState(null);
     const [editTarget,   setEditTarget]   = useState(null);
     const [deleteTarget, setDeleteTarget] = useState(null);
@@ -73,7 +76,7 @@ export default function Utilisateurs() {
                     <h2>Liste des utilisateurs</h2>
                 </div>
                 <Toolbar
-                    searchBar={<SearchBar placeholder="Rechercher un utilisateur..." />}
+                    searchBar={<SearchBar placeholder="Rechercher un utilisateur..." value={search} onChange={setSearch} />}
                     sortButton={
                         <ActionButton icon={SortIcon}>
                             {sortKey ? `Trié par ${sortKey}` : "Les plus récents"}
@@ -82,11 +85,6 @@ export default function Utilisateurs() {
                     filterButton={
                         <ActionButton icon={FilterIcon} onClick={() => setShowFilter(true)}>
                             Filtres{activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}
-                        </ActionButton>
-                    }
-                    createButton={
-                        <ActionButton icon={MessageIcon} filled onClick={() => setShowMessage(true)}>
-                            Envoyer un message
                         </ActionButton>
                     }
                 />
@@ -118,7 +116,6 @@ export default function Utilisateurs() {
             </section>
 
             <UserSheet user={viewTarget} onClose={() => setViewTarget(null)} />
-            <SendMessageModal isOpen={showMessage} onClose={() => setShowMessage(false)} />
             <EditUserModal user={editTarget} onClose={() => setEditTarget(null)} onSave={handleUserSaved} />
             <FilterModal isOpen={showFilter} onClose={() => setShowFilter(false)} config={FILTER_CONFIG} values={filters} onChange={setFilters} />
             <DeleteConfirm

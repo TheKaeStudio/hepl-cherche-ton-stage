@@ -5,6 +5,7 @@
     border: 2px solid #e5e5e5;
     gap: 8px;
     max-width: 400px;
+    overflow: hidden;
 
     & svg {
         width: 24px;
@@ -16,5 +17,6 @@
         outline: none;
         background: none;
         color: var(--text-h);
+        width: 100%;
     }
 }

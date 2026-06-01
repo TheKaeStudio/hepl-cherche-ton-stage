@@ -12,7 +12,7 @@ export function SideMenuProvider({ children }) {
 
     function openMobile() {
         setIsMobileOpen(true);
-        setIsCollapsed(false); // always show full menu when opening on mobile
+        setIsCollapsed(false);
     }
 
     function closeMobile() {

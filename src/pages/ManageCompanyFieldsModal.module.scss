@@ -1,0 +1,125 @@
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.hint {
+    font-size: 13px;
+    color: var(--text);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.empty {
+    font-size: 13px;
+    color: var(--text);
+    opacity: 0.6;
+    text-align: center;
+    padding: 12px 0;
+    margin: 0;
+}
+
+.item {
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.readRow,
+.editRow {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px;
+}
+
+.fieldLabel {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-h);
+}
+
+.editInput {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: none;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-h);
+    font-family: var(--sans);
+    padding: 2px 0;
+}
+
+.iconBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: var(--text);
+    border-radius: 6px;
+    transition: background 0.12s, color 0.12s;
+    flex-shrink: 0;
+
+    &:hover { background: var(--accent-bg); color: var(--text-h); }
+    &:disabled { opacity: 0.4; cursor: not-allowed; }
+}
+
+.danger {
+    &:hover { background: #fef2f2; color: #ef4444; }
+}
+
+.addRow {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding-top: 4px;
+    border-top: 2px solid var(--border);
+}
+
+.addInput {
+    flex: 1;
+    padding: 10px 12px;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    font-size: 14px;
+    color: var(--text-h);
+    background: var(--bg);
+    outline: none;
+    font-family: var(--sans);
+    transition: border-color 0.15s;
+
+    &::placeholder { color: var(--text); opacity: 0.6; }
+    &:focus { border-color: var(--accent); }
+}
+
+.addBtn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 14px;
+    border: 2px solid var(--accent);
+    border-radius: 10px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: var(--sans);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.12s;
+
+    &:disabled { opacity: 0.4; cursor: not-allowed; }
+    &:hover:not(:disabled) { opacity: 0.85; }
+}

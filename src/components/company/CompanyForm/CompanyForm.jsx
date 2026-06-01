@@ -1,14 +1,23 @@
 import { SIZES, PROVINCES } from "@/data/company";
+import { useCompanyFields } from "@/contexts/CompanyFieldsContext";
 import FormField from "@/components/ui/FormField/FormField";
+import TagInput from "@/components/ui/TagInput/TagInput";
 import CustomRadio from "@/components/ui/CustomRadio/CustomRadio";
 import CustomCheckbox from "@/components/ui/CustomCheckbox/CustomCheckbox";
 import LogoUploadField from "@/components/ui/LogoUploadField/LogoUploadField";
 import ContactsForm from "@/components/ui/ContactsForm/ContactsForm";
 import styles from "./CompanyForm.module.scss";
 
-export default function CompanyForm({ form, setForm, contacts, setContacts, errors, sectorOptions }) {
+export default function CompanyForm({ form, setForm, contacts, setContacts, errors, domainSuggestions = [], tagSuggestions = [] }) {
+    const { fields } = useCompanyFields();
     const set    = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
-    const toggle = (key) => ()  => setForm((f) => ({ ...f, [key]: !f[key] }));
+
+    function toggleCustom(fieldId) {
+        setForm((f) => ({
+            ...f,
+            customValues: { ...f.customValues, [fieldId]: !f.customValues?.[fieldId] },
+        }));
+    }
 
     return (
         <div className={styles.form}>
@@ -22,7 +31,22 @@ export default function CompanyForm({ form, setForm, contacts, setContacts, erro
                 <FormField label="Site web" placeholder="https://www.exemple.be" value={form.website} onChange={set("website")} />
             </div>
             <div className={styles.row}>
-                <FormField label="Secteur" type="select" value={form.sector} onChange={set("sector")} options={sectorOptions} />
+                <TagInput
+                    label="Domaines"
+                    placeholder="Informatique, Finance…"
+                    values={form.domains}
+                    onChange={(v) => setForm((f) => ({ ...f, domains: v }))}
+                    suggestions={domainSuggestions}
+                />
+                <TagInput
+                    label="Secteurs"
+                    placeholder="Web, Backend, Mobile…"
+                    values={form.tags}
+                    onChange={(v) => setForm((f) => ({ ...f, tags: v }))}
+                    suggestions={tagSuggestions}
+                />
+            </div>
+            <div className={styles.row}>
                 <FormField label="Taille" type="select" value={form.size} onChange={set("size")} options={SIZES} />
             </div>
             <div className={styles.row}>
@@ -56,14 +80,19 @@ export default function CompanyForm({ form, setForm, contacts, setContacts, erro
 
             <ContactsForm contacts={contacts} onChange={setContacts} />
 
-            <div className={styles.checkboxRow}>
-                <CustomCheckbox checked={form.offresObservation} onChange={toggle("offresObservation")}>
-                    Stage d'observation disponible
-                </CustomCheckbox>
-                <CustomCheckbox checked={form.offres3e} onChange={toggle("offres3e")}>
-                    Stage BAC3 disponible
-                </CustomCheckbox>
-            </div>
+            {fields.length > 0 && (
+                <div className={styles.checkboxRow}>
+                    {fields.map((field) => (
+                        <CustomCheckbox
+                            key={field._id}
+                            checked={!!form.customValues?.[field._id]}
+                            onChange={() => toggleCustom(field._id)}
+                        >
+                            {field.label}
+                        </CustomCheckbox>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }

@@ -1,9 +1,10 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCompanies, createCompany, deleteCompany, giveAccess } from "@/api/companies";
 import { useSecteurs } from "@/contexts/SecteurContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
+import { useDebounce } from "@/hooks/useDebounce";
 import SearchBar from "@/components/ui/SearchBar/SearchBar";
 import ActionButton from "@/components/ui/ActionButton/ActionButton";
 import DropdownActionMenu from "@/components/ui/DropdownActionMenu/DropdownActionMenu";
@@ -11,9 +12,9 @@ import Toolbar from "@/components/layout/Toolbar/Toolbar";
 import DataTable from "@/components/dataTable/DataTable";
 import Tag from "@/components/ui/Tag/Tag";
 import LoadMore from "@/components/ui/LoadMore/LoadMore";
-import EntrepriseSheet from "@/components/sheets/EntrepriseSheet";
+import CompanySheet from "@/components/sheets/CompanySheet";
 import CreateEntrepriseModal from "./CreateCompanyModal";
-import GestionSecteursModal from "./GestionSecteursModal";
+import ManageCompanyFieldsModal from "./ManageCompanyFieldsModal";
 import DeleteConfirm from "@/components/ui/DeleteConfirm/DeleteConfirm";
 import FilterModal from "./FilterModal";
 import Modal from "@/components/ui/Modal/Modal";
@@ -29,12 +30,17 @@ export default function Entreprises() {
     const { sectors }     = useSecteurs();
     const { user }        = useAuth();
 
-    const { items: companies, loading, loadingMore, hasMore, total, loadMore, setItems: setCompanies } =
-        usePaginatedList((params) => getCompanies(params), 20);
+    const [search, setSearch] = useState("");
+    const debouncedSearch = useDebounce(search, 500);
+
+    const { items: companies, loading, loadingMore, hasMore, total, loadMore, reset, setItems: setCompanies } =
+        usePaginatedList((params) => getCompanies({ ...params, search: debouncedSearch || undefined }), 20);
+
+    useEffect(() => { reset(); }, [debouncedSearch]);
 
     const [selectedCompany, setSelectedCompany] = useState(null);
     const [showCreate,      setShowCreate]      = useState(false);
-    const [showSecteurs,    setShowSecteurs]    = useState(false);
+    const [showManageFields, setShowManageFields] = useState(false);
     const [deleteTarget,    setDeleteTarget]    = useState(null);
     const [accessTarget,    setAccessTarget]    = useState(null);
     const [linkCreating,    setLinkCreating]    = useState(false);
@@ -87,12 +93,19 @@ export default function Entreprises() {
     }
 
     const FILTER_CONFIG = useMemo(() => {
-        const provinces = [...new Set(companies.map((c) => c.province).filter(Boolean))].sort();
+        const provinces  = [...new Set(companies.map((c) => c.province).filter(Boolean))].sort();
+        const allDomains = [...new Set(companies.flatMap((c) => c.domains ?? []).filter(Boolean))].sort();
+        const allTags    = [...new Set(companies.flatMap((c) => c.tags    ?? []).filter(Boolean))].sort();
         return [
             {
                 key: "domain",
+                label: "Domaine",
+                options: allDomains.map((d) => ({ value: d, label: d })),
+            },
+            {
+                key: "tag",
                 label: "Secteur",
-                options: sectors.map((s) => ({ value: s.name, label: s.name })),
+                options: allTags.map((t) => ({ value: t, label: t })),
             },
             {
                 key: "province",
@@ -100,11 +113,12 @@ export default function Entreprises() {
                 options: provinces.map((p) => ({ value: p, label: p })),
             },
         ];
-    }, [companies, sectors]);
+    }, [companies]);
 
     const displayed = useMemo(() => {
         let list = [...companies];
-        if (filters.domain?.length)   list = list.filter((c) => filters.domain.includes(c.domain));
+        if (filters.domain?.length)   list = list.filter((c) => filters.domain.some((d) => (c.domains ?? []).includes(d)));
+        if (filters.tag?.length)      list = list.filter((c) => filters.tag.some((t)    => (c.tags    ?? []).includes(t)));
         if (filters.province?.length) list = list.filter((c) => filters.province.includes(c.province));
         if (sortKey) {
             list.sort((a, b) => {
@@ -126,7 +140,7 @@ export default function Entreprises() {
                 </div>
                 {user?.role !== "limited" && (
                     <Toolbar
-                        searchBar={<SearchBar placeholder="Rechercher une entreprise…" />}
+                        searchBar={<SearchBar placeholder="Rechercher une entreprise…" value={search} onChange={setSearch} />}
                         sortButton={
                             <ActionButton icon={SortIcon}>
                                 {sortKey ? `Trié par ${sortKey}` : "Les plus récents"}
@@ -143,7 +157,7 @@ export default function Entreprises() {
                                 filled
                                 items={[
                                     { label: "Ajouter une entreprise", onClick: () => setShowCreate(true) },
-                                    { label: "Gérer les secteurs",     onClick: () => setShowSecteurs(true) },
+                                    { label: "Modifier le formulaire", onClick: () => setShowManageFields(true) },
                                 ]}
                             />
                         }
@@ -153,7 +167,8 @@ export default function Entreprises() {
                     <DataTable.Header sortKey={sortKey} sortDir={sortDir} onSort={handleSort}>
                         <DataTable.Row>
                             <DataTable.SortableCell column="name">Entreprise</DataTable.SortableCell>
-                            <DataTable.SortableCell column="domain">Secteur</DataTable.SortableCell>
+                            <DataTable.Cell>Domaines</DataTable.Cell>
+                            <DataTable.Cell>Secteurs</DataTable.Cell>
                             <DataTable.Cell>Lieu</DataTable.Cell>
                             <DataTable.Cell>Contact</DataTable.Cell>
                             <DataTable.Cell end>Actions</DataTable.Cell>
@@ -161,15 +176,27 @@ export default function Entreprises() {
                     </DataTable.Header>
                     <DataTable.Body loading={loading}>
                         {displayed.map((company) => {
-                            const sectorObj = company.sector ?? sectors.find((s) => s.name === company.domain) ?? null;
-                            const lieu      = company.province ?? company.country ?? "—";
-                            const canManage = user?.role === "admin" || user?.role === "manager";
+                            const sectorObj  = company.sector ?? sectors.find((s) => s.name === company.domain) ?? null;
+                            const hasTags    = company.tags?.length > 0;
+                            const lieu       = company.province ?? company.country ?? "—";
+                            const canManage  = user?.role === "admin" || user?.role === "manager";
                             return (
                                 <DataTable.Row key={company.id}>
                                     <DataTable.Cell>{company.name}</DataTable.Cell>
                                     <DataTable.Cell>
-                                        <ul className={styles.tagList}>
-                                            <Tag sector={sectorObj} />
+                                        <ul className={styles.tagColumn}>
+                                            {company.domains?.length > 0
+                                                ? company.domains.map((d) => <Tag key={d} name={d} />)
+                                                : <span className={styles.muted}>—</span>
+                                            }
+                                        </ul>
+                                    </DataTable.Cell>
+                                    <DataTable.Cell>
+                                        <ul className={styles.tagColumn}>
+                                            {hasTags
+                                                ? company.tags.map((t) => <Tag key={t} name={t} />)
+                                                : (sectorObj ? <Tag sector={sectorObj} /> : <span className={styles.muted}>—</span>)
+                                            }
                                         </ul>
                                     </DataTable.Cell>
                                     <DataTable.Cell muted>{lieu}</DataTable.Cell>
@@ -188,9 +215,9 @@ export default function Entreprises() {
                 <LoadMore hasMore={hasMore} loading={loadingMore} onLoadMore={loadMore} count={companies.length} total={total} />
             </section>
 
-            <EntrepriseSheet company={selectedCompany} onClose={() => setSelectedCompany(null)} />
+            <CompanySheet company={selectedCompany} onClose={() => setSelectedCompany(null)} />
             <CreateEntrepriseModal isOpen={showCreate} onClose={() => setShowCreate(false)} onSave={handleCreate} />
-            <GestionSecteursModal  isOpen={showSecteurs} onClose={() => setShowSecteurs(false)} />
+            <ManageCompanyFieldsModal isOpen={showManageFields} onClose={() => setShowManageFields(false)} />
             <FilterModal
                 isOpen={showFilter}
                 onClose={() => setShowFilter(false)}

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getCompany, updateCompany } from "@/api/companies";
-import { useSecteurs } from "@/contexts/SecteurContext";
+import { getCompany, updateCompany, getCompanyMeta } from "@/api/companies";
 import CompanyForm from "@/components/company/CompanyForm/CompanyForm";
 import { emptyContact } from "@/components/ui/ContactsForm/ContactsForm";
 import styles from "./EditCompanyPage.module.scss";
@@ -9,30 +8,35 @@ import styles from "./EditCompanyPage.module.scss";
 import ArrowBack from "@mui/icons-material/ArrowBack";
 
 const emptyForm = () => ({
-    name: "", sector: "", size: "", website: "", phone: "", description: "",
+    name: "", domains: [], tags: [], customValues: {}, size: "", website: "", phone: "", description: "",
     street: "", city: "", postalCode: "", province: "", country: "",
     locationType: "belgique", logo: null,
-    offresObservation: false, offres3e: false,
 });
 
 export default function EditCompanyPage() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { sectors } = useSecteurs();
 
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [errors, setErrors] = useState({});
     const [form, setForm] = useState(emptyForm);
     const [contacts, setContacts] = useState([emptyContact()]);
+    const [meta, setMeta] = useState({ domains: [], tags: [] });
+
+    useEffect(() => {
+        getCompanyMeta().then(setMeta).catch(() => {});
+    }, []);
 
     useEffect(() => {
         getCompany(id)
             .then((c) => {
                 const hasProvince = !!c.address?.province;
                 setForm({
-                    name: c.name ?? "",
-                    sector: c.sectorId ?? "",
+                    name:         c.name ?? "",
+                    domains:      c.domains ?? [],
+                    tags:         c.tags    ?? [],
+                    customValues: c.customValues ?? {},
                     size: c.size ?? "",
                     website: c.website ?? "",
                     phone: c.phone ?? "",
@@ -58,17 +62,13 @@ export default function EditCompanyPage() {
                             name: ct.name ?? "",
                             email: ct.email ?? "",
                             phone: ct.phone ?? "",
+                            visibility: ct.visibility ?? "public",
                         })),
                     );
             })
             .catch(() => navigate("/entreprises"))
             .finally(() => setLoading(false));
     }, [id, navigate]);
-
-    const sectorOptions = [
-        { value: "", label: "Aucun secteur" },
-        ...sectors.map((s) => ({ value: s._id, label: s.name })),
-    ];
 
     async function handleSubmit(e) {
         e.preventDefault();
@@ -85,13 +85,16 @@ export default function EditCompanyPage() {
                 name: c.name,
                 email: c.email || undefined,
                 phone: c.phone || undefined,
+                visibility: c.visibility || "public",
             }));
 
         try {
             await updateCompany(id, {
                 name: form.name,
                 description: form.description || undefined,
-                sector: form.sector || undefined,
+                domains:      form.domains,
+                tags:         form.tags,
+                customValues: form.customValues,
                 size: form.size || undefined,
                 website: form.website || undefined,
                 phone: form.phone || undefined,
@@ -156,7 +159,8 @@ export default function EditCompanyPage() {
                     contacts={contacts}
                     setContacts={setContacts}
                     errors={errors}
-                    sectorOptions={sectorOptions}
+                    domainSuggestions={meta.domains}
+                    tagSuggestions={meta.tags}
                 />
                 <div className={styles.formFooter}>
                     <button

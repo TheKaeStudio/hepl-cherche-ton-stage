@@ -38,13 +38,52 @@
 }
 
 .block {
-    position: relative;
     display: flex;
     flex-direction: column;
     gap: 12px;
     padding: 14px;
     border: 2px solid var(--border);
     border-radius: 12px;
+    transition: border-color 0.15s;
+}
+
+.blockPrivate {
+    border-color: rgba(249, 115, 22, 0.35);
+}
+
+.blockTopRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.visibilityBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 99px;
+    border: 1.5px solid;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--sans);
+    transition: opacity 0.12s;
+    svg { font-size: 13px !important; }
+    &:hover { opacity: 0.75; }
+}
+
+.visPublic {
+    color: #22c55e;
+    border-color: rgba(34, 197, 94, 0.4);
+    background: rgba(34, 197, 94, 0.08);
+}
+
+.visPrivate {
+    color: #f97316;
+    border-color: rgba(249, 115, 22, 0.4);
+    background: rgba(249, 115, 22, 0.08);
 }
 
 .row {
@@ -54,9 +93,6 @@
 }
 
 .removeBtn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
     display: flex;
     align-items: center;
     justify-content: center;

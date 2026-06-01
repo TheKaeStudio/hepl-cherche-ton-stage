@@ -1,29 +1,26 @@
-import { useState } from "react";
-import { useSecteurs } from "@/contexts/SecteurContext";
+import { useState, useEffect } from "react";
+import { getCompanyMeta } from "@/api/companies";
 import Modal from "@/components/ui/Modal/Modal";
 import CompanyForm from "@/components/company/CompanyForm/CompanyForm";
 import { emptyContact } from "@/components/ui/ContactsForm/ContactsForm";
 import styles from "./CreateCompanyModal.module.scss";
 
 const emptyForm = () => ({
-    name: "", sector: "", size: "", website: "", phone: "", description: "",
+    name: "", domains: [], tags: [], customValues: {}, size: "", website: "", phone: "", description: "",
     street: "", city: "", postalCode: "", province: "", country: "",
     locationType: "belgique", logo: null,
-    offresObservation: false, offres3e: false,
 });
 
 export default function CreateCompanyModal({ isOpen, onClose, onSave }) {
-    const { sectors } = useSecteurs();
-
     const [form, setForm] = useState(emptyForm);
     const [contacts, setContacts] = useState([emptyContact()]);
     const [errors, setErrors] = useState({});
     const [submitting, setSubmitting] = useState(false);
+    const [meta, setMeta] = useState({ domains: [], tags: [] });
 
-    const sectorOptions = [
-        { value: "", label: "Aucun secteur" },
-        ...sectors.map((s) => ({ value: s._id, label: s.name })),
-    ];
+    useEffect(() => {
+        if (isOpen) getCompanyMeta().then(setMeta).catch(() => {});
+    }, [isOpen]);
 
     function validate() {
         const e = {};
@@ -45,6 +42,7 @@ export default function CreateCompanyModal({ isOpen, onClose, onSave }) {
                 name: c.name,
                 email: c.email || undefined,
                 phone: c.phone || undefined,
+                visibility: c.visibility || "public",
             }));
 
         setSubmitting(true);
@@ -52,7 +50,9 @@ export default function CreateCompanyModal({ isOpen, onClose, onSave }) {
             await onSave?.({
                 name: form.name,
                 description: form.description || undefined,
-                sector: form.sector || undefined,
+                domains:      form.domains,
+                tags:         form.tags,
+                customValues: form.customValues,
                 size: form.size || undefined,
                 website: form.website || undefined,
                 phone: form.phone || undefined,
@@ -131,7 +131,8 @@ export default function CreateCompanyModal({ isOpen, onClose, onSave }) {
                     contacts={contacts}
                     setContacts={setContacts}
                     errors={errors}
-                    sectorOptions={sectorOptions}
+                    domainSuggestions={meta.domains}
+                    tagSuggestions={meta.tags}
                 />
             </form>
         </Modal>

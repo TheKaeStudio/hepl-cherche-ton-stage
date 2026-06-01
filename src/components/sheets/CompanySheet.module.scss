@@ -1,0 +1,158 @@
+.header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.logoWrap {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    border: 1.5px solid var(--border);
+    background: var(--accent-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
+
+    img { width: 100%; height: 100%; object-fit: contain; }
+    svg { font-size: 28px !important; color: var(--border); }
+}
+
+.headerText {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.name {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text-h);
+}
+
+.province {
+    font-size: 14px;
+    color: var(--text);
+    font-weight: 500;
+}
+
+.tagsSection {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.tagGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.tagGroupLabel {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin: 0;
+}
+
+.tagList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.description {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.6;
+}
+
+.yes {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #22c55e;
+    svg { font-size: 16px !important; }
+}
+
+.no {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #ef4444;
+    svg { font-size: 16px !important; }
+}
+
+.contactSection {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sectionLabel {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+}
+
+.contactHeader {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px;
+}
+
+.contactName {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-h);
+}
+
+.privateBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #f97316;
+    background: rgba(249, 115, 22, 0.1);
+    border: 1px solid rgba(249, 115, 22, 0.25);
+    border-radius: 99px;
+    padding: 2px 7px;
+    svg { font-size: 11px !important; }
+}
+
+.contactSeparator {
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+}
+
+.contactLink {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-h);
+    text-decoration: none;
+    padding: 10px 12px;
+    border-radius: 10px;
+    transition: background 0.15s;
+
+    svg { font-size: 18px !important; color: var(--accent); }
+    &:hover { background: var(--accent-bg); }
+}

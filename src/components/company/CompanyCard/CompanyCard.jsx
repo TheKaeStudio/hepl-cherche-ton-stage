@@ -2,6 +2,7 @@ import styles from "./CompanyCard.module.scss";
 
 import Tag from "@components/ui/Tag/Tag";
 import ActionButton from "@components/ui/ActionButton/ActionButton";
+import { useCompanyFields } from "@/contexts/CompanyFieldsContext";
 
 import MailIcon from "@mui/icons-material/MailOutlined";
 import PhoneIcon from "@mui/icons-material/PhoneOutlined";
@@ -11,16 +12,19 @@ import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 
 export default function CompanyCard({ company, onLearnMore, isSaved, onToggleSave }) {
+    const { fields } = useCompanyFields();
+    const hasTags = company?.tags?.length > 0;
+    const activeFields = fields.filter((f) => company?.customValues?.[f._id]);
     return (
         <article className={styles.companyCard}>
             <ul>
-                <Tag sector={company?.sector ?? null} />
-                {company?.offresObservation && (
-                    <Tag>Stage d'observation</Tag>
-                )}
-                {company?.offres3e && (
-                    <Tag>Stage BAC3</Tag>
-                )}
+                {hasTags
+                    ? company.tags.map((t) => <Tag key={t} name={t} />)
+                    : <Tag sector={company?.sector ?? null} />
+                }
+                {activeFields.map((f) => (
+                    <Tag key={f._id}>{f.label}</Tag>
+                ))}
             </ul>
             <div className={styles.companyInfos}>
                 {company?.logo ? (

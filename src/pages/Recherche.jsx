@@ -1,14 +1,14 @@
 import { useState, useEffect, useMemo } from "react";
 import { getCompanies } from "@/api/companies";
 import { useSaved } from "@/contexts/SavedContext";
-import { useSecteurs } from "@/contexts/SecteurContext";
+import { useDebounce } from "@/hooks/useDebounce";
 import styles from "./Recherche.module.scss";
 
 import SearchBar from "@/components/ui/SearchBar/SearchBar";
 import Toolbar from "@/components/layout/Toolbar/Toolbar";
 import ActionButton from "@/components/ui/ActionButton/ActionButton";
 import CompanyCard from "@/components/company/CompanyCard/CompanyCard";
-import EntrepriseSheet from "@/components/sheets/EntrepriseSheet";
+import CompanySheet from "@/components/sheets/CompanySheet";
 import FilterModal from "./FilterModal";
 
 import SortIcon from "@mui/icons-material/ImportExport";
@@ -22,17 +22,21 @@ const SORT_OPTIONS = [
 
 export default function Recherche() {
     const { savedIds, toggleSaved } = useSaved();
-    const { sectors } = useSecteurs();
     const [companies, setCompanies] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedCompany, setSelectedCompany] = useState(null);
     const [showFilter, setShowFilter] = useState(false);
     const [filters, setFilters] = useState({});
     const [sortIdx, setSortIdx] = useState(0);
+    const [search, setSearch] = useState("");
+    const debouncedSearch = useDebounce(search, 500);
 
     useEffect(() => {
-        getCompanies().then(setCompanies).finally(() => setLoading(false));
-    }, []);
+        setLoading(true);
+        getCompanies({ search: debouncedSearch || undefined })
+            .then(setCompanies)
+            .finally(() => setLoading(false));
+    }, [debouncedSearch]);
 
     function cycleSort() {
         setSortIdx((i) => (i + 1) % SORT_OPTIONS.length);
@@ -42,12 +46,19 @@ export default function Recherche() {
     const currentSort = SORT_OPTIONS[sortIdx];
 
     const FILTER_CONFIG = useMemo(() => {
-        const provinces = [...new Set(companies.map((c) => c.province).filter(Boolean))].sort();
+        const provinces  = [...new Set(companies.map((c) => c.province).filter(Boolean))].sort();
+        const allDomains = [...new Set(companies.flatMap((c) => c.domains ?? []).filter(Boolean))].sort();
+        const allTags    = [...new Set(companies.flatMap((c) => c.tags    ?? []).filter(Boolean))].sort();
         return [
             {
                 key: "domain",
                 label: "Domaine",
-                options: sectors.map((s) => ({ value: s.name, label: s.name })),
+                options: allDomains.map((d) => ({ value: d, label: d })),
+            },
+            {
+                key: "tag",
+                label: "Secteur",
+                options: allTags.map((t) => ({ value: t, label: t })),
             },
             {
                 key: "province",
@@ -55,11 +66,12 @@ export default function Recherche() {
                 options: provinces.map((p) => ({ value: p, label: p })),
             },
         ];
-    }, [companies, sectors]);
+    }, [companies]);
 
     const displayed = useMemo(() => {
         let list = companies.filter((c) => {
-            if (filters.domain?.length   && !filters.domain.includes(c.domain))     return false;
+            if (filters.domain?.length   && !filters.domain.some((d) => (c.domains ?? []).includes(d))) return false;
+            if (filters.tag?.length      && !filters.tag.some((t)    => (c.tags    ?? []).includes(t))) return false;
             if (filters.province?.length && !filters.province.includes(c.province)) return false;
             return true;
         });
@@ -81,7 +93,7 @@ export default function Recherche() {
                     <p>Explorez et trouvez le stage qui vous convient le mieux.</p>
                 </div>
                 <Toolbar
-                    searchBar={<SearchBar placeholder="Rechercher une entreprise..." />}
+                    searchBar={<SearchBar placeholder="Rechercher une entreprise..." value={search} onChange={setSearch} />}
                     sortButton={
                         <ActionButton icon={SortIcon} onClick={cycleSort}>
                             {currentSort.label}
@@ -112,7 +124,7 @@ export default function Recherche() {
                 )}
             </section>
 
-            <EntrepriseSheet company={selectedCompany} onClose={() => setSelectedCompany(null)} />
+            <CompanySheet company={selectedCompany} onClose={() => setSelectedCompany(null)} />
             <FilterModal
                 isOpen={showFilter}
                 onClose={() => setShowFilter(false)}

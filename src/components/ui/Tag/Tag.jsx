@@ -1,4 +1,5 @@
 import styles from "./Tag.module.scss";
+import { colorFromName, colorBgFromName } from "@/utils/colorFromName";
 
 import CancelIcon    from "@mui/icons-material/Cancel";
 import PauseCircle   from "@mui/icons-material/PauseCircle";
@@ -30,7 +31,7 @@ function hexToAlpha(hex, a = 0.12) {
 
 export { hexToAlpha };
 
-export default function Tag({ icon: Icon, background, color, children, status, group, sector }) {
+export default function Tag({ icon: Icon, background, color, children, status, group, sector, name }) {
     if (status) {
         const cfg = STATUS_CONFIG[status] ?? { Icon: null, color: "#6b7280", background: "#f9fafb", label: status };
         Icon       = cfg.Icon;
@@ -48,6 +49,11 @@ export default function Tag({ icon: Icon, background, color, children, status, g
         color      = c;
         background = hexToAlpha(c);
         children   = sector?.name ?? "Aucun secteur";
+        Icon       = null;
+    } else if (name !== undefined) {
+        color      = colorFromName(name);
+        background = colorBgFromName(name);
+        children   = name;
         Icon       = null;
     }
 
