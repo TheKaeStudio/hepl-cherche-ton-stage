@@ -32,6 +32,8 @@ export function normalizeCompany(c) {
         logo:        c.logo ?? null,
         offresObservation: c.offresObservation ?? false,
         offres3e:          c.offres3e ?? false,
+        teacherInfo:  c.teacherInfo  ?? null,
+        teacherNotes: c.teacherNotes ?? null,
         invite:      c.invite ?? null,
     };
 }

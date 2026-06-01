@@ -31,25 +31,40 @@ export default function DashboardLayout() {
 
     return (
         <SavedProvider>
-        <SecteurProvider>
-        <CompanyFieldsProvider>
-        <SideMenuProvider>
-            <SideMenu />
-            <Main>
-                <Routes location={background ?? location}>
-                    <Route path="/" element={<Recherche />} />
-                    <Route path="entreprises" element={user?.role === "limited" ? <Navigate to="/" replace /> : <Entreprises />} />
-                    <Route path="entreprises/:id/modifier" element={<EditEntreprisePage />} />
-                    <Route path="utilisateurs" element={<Utilisateurs />} />
-                    <Route path="saved" element={<Saved />} />
-                    <Route path="*" element={<ErrorPage />} />
-                </Routes>
-            </Main>
+            <SecteurProvider>
+                <CompanyFieldsProvider>
+                    <SideMenuProvider>
+                        <SideMenu />
+                        <Main>
+                            <Routes location={background ?? location}>
+                                <Route path="/" element={<Recherche />} />
+                                <Route
+                                    path="entreprises"
+                                    element={
+                                        user?.role === "limited" ? (
+                                            <Navigate to="/" replace />
+                                        ) : (
+                                            <Entreprises />
+                                        )
+                                    }
+                                />
+                                <Route
+                                    path="entreprises/:id/modifier"
+                                    element={<EditEntreprisePage />}
+                                />
+                                <Route
+                                    path="utilisateurs"
+                                    element={<Utilisateurs />}
+                                />
+                                <Route path="saved" element={<Saved />} />
+                                <Route path="*" element={<ErrorPage />} />
+                            </Routes>
+                        </Main>
 
-            {modal}
-        </SideMenuProvider>
-        </CompanyFieldsProvider>
-        </SecteurProvider>
+                        {modal}
+                    </SideMenuProvider>
+                </CompanyFieldsProvider>
+            </SecteurProvider>
         </SavedProvider>
     );
 }

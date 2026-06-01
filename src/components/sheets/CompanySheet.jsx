@@ -15,6 +15,7 @@ import LockIcon   from "@mui/icons-material/LockOutlined";
 export default function CompanySheet({ company, onClose }) {
     const { user } = useAuth();
     const { fields } = useCompanyFields();
+    const isEducator   = ["teacher", "manager", "admin"].includes(user?.role);
     const isPrivileged = user?.role === "admin" || user?.role === "manager";
 
     const customValues = company?.customValues ?? {};
@@ -91,7 +92,7 @@ export default function CompanySheet({ company, onClose }) {
                                 <div key={i} className={i > 0 ? styles.contactSeparator : undefined}>
                                     <div className={styles.contactHeader}>
                                         <p className={styles.contactName}>{ct.name}</p>
-                                        {ct.visibility === "private" && isPrivileged && (
+                                        {ct.visibility === "private" && isEducator && (
                                             <span className={styles.privateBadge} title="Contact privé">
                                                 <LockIcon fontSize="inherit" /> Privé
                                             </span>
@@ -111,6 +112,22 @@ export default function CompanySheet({ company, onClose }) {
                                     )}
                                 </div>
                             ))}
+                        </div>
+                    )}
+                    {company.teacherInfo && (
+                        <div className={styles.privateSection}>
+                            <p className={styles.sectionLabel}>
+                                <LockIcon fontSize="inherit" /> Informations aux enseignants
+                            </p>
+                            <p className={styles.privateText}>{company.teacherInfo}</p>
+                        </div>
+                    )}
+                    {company.teacherNotes && (
+                        <div className={styles.privateSection}>
+                            <p className={styles.sectionLabel}>
+                                <LockIcon fontSize="inherit" /> Notes des enseignants
+                            </p>
+                            <p className={styles.privateText}>{company.teacherNotes}</p>
                         </div>
                     )}
                 </>

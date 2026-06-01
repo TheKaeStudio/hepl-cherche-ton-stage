@@ -11,6 +11,7 @@ const emptyForm = () => ({
     name: "", domains: [], tags: [], customValues: {}, size: "", website: "", phone: "", description: "",
     street: "", city: "", postalCode: "", province: "", country: "",
     locationType: "belgique", logo: null,
+    teacherInfo: "", teacherNotes: "",
 });
 
 export default function EditCompanyPage() {
@@ -48,8 +49,8 @@ export default function EditCompanyPage() {
                     country: c.address?.country ?? "",
                     locationType: hasProvince ? "belgique" : "autre",
                     logo: c.logo ?? null,
-                    offresObservation: c.offresObservation ?? false,
-                    offres3e: c.offres3e ?? false,
+                    teacherInfo:  c.teacherInfo  ?? "",
+                    teacherNotes: c.teacherNotes ?? "",
                 });
                 const raw = c.contacts?.length
                     ? c.contacts
@@ -114,8 +115,8 @@ export default function EditCompanyPage() {
                 },
                 contact: validContacts[0] ?? undefined,
                 contacts: validContacts,
-                offresObservation: form.offresObservation,
-                offres3e: form.offres3e,
+                teacherInfo:  form.teacherInfo  || undefined,
+                teacherNotes: form.teacherNotes || undefined,
             });
             navigate("/entreprises");
         } catch (err) {

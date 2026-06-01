@@ -114,6 +114,7 @@
     align-items: center;
     gap: 8px;
     padding: 0 12px;
+    margin-bottom: 8px;
 }
 
 .contactName {
@@ -139,6 +140,31 @@
 .contactSeparator {
     padding-top: 12px;
     border-top: 1px solid var(--border);
+}
+
+.privateSection {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1.5px dashed var(--border);
+    background: var(--accent-bg);
+
+    .sectionLabel {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        svg { font-size: 12px !important; }
+    }
+}
+
+.privateText {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.6;
+    margin: 0;
+    white-space: pre-wrap;
 }
 
 .contactLink {

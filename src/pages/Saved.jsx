@@ -1,15 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
 import { getCompanies } from "@/api/companies";
 import { useSaved } from "@/contexts/SavedContext";
-import SearchBar from "@/components/ui/SearchBar/SearchBar";
-import ActionButton from "@/components/ui/ActionButton/ActionButton";
-import Toolbar from "@/components/layout/Toolbar/Toolbar";
 import CompanyCard from "@/components/company/CompanyCard/CompanyCard";
-import EntrepriseSheet from "@/components/sheets/EntrepriseSheet";
+import CompanySheet from "@/components/sheets/CompanySheet";
 import styles from "./Saved.module.scss";
-
-import SortIcon from "@mui/icons-material/ImportExport";
-import FilterIcon from "@mui/icons-material/FilterList";
 
 export default function Saved() {
     const { savedIds, toggleSaved } = useSaved();
@@ -52,7 +46,7 @@ export default function Saved() {
                 )}
             </section>
 
-            <EntrepriseSheet company={selectedCompany} onClose={() => setSelectedCompany(null)} />
+            <CompanySheet company={selectedCompany} onClose={() => setSelectedCompany(null)} />
         </>
     );
 }

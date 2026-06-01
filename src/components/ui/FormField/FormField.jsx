@@ -1,6 +1,7 @@
 import { useState } from "react";
 import VisibilityIcon from "@mui/icons-material/VisibilityOutlined";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOffOutlined";
+import InfoIcon from "@mui/icons-material/InfoOutlined";
 import styles from "./FormField.module.scss";
 
 export default function FormField({
@@ -11,6 +12,7 @@ export default function FormField({
     onChange,
     error,
     hint,
+    info,
     required,
     autoComplete,
     options,
@@ -24,6 +26,11 @@ export default function FormField({
         <label className={styles.label}>
             {label}
             {required && <span className={styles.required}>*</span>}
+            {info && (
+                <span className={styles.infoWrap} title={info}>
+                    <InfoIcon />
+                </span>
+            )}
         </label>
     );
 

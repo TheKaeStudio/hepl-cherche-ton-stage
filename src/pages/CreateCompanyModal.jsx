@@ -9,6 +9,7 @@ const emptyForm = () => ({
     name: "", domains: [], tags: [], customValues: {}, size: "", website: "", phone: "", description: "",
     street: "", city: "", postalCode: "", province: "", country: "",
     locationType: "belgique", logo: null,
+    teacherInfo: "", teacherNotes: "",
 });
 
 export default function CreateCompanyModal({ isOpen, onClose, onSave }) {
@@ -72,8 +73,8 @@ export default function CreateCompanyModal({ isOpen, onClose, onSave }) {
                 },
                 contact: validContacts[0] ?? undefined,
                 contacts: validContacts.length > 0 ? validContacts : undefined,
-                offresObservation: form.offresObservation,
-                offres3e: form.offres3e,
+                teacherInfo:  form.teacherInfo  || undefined,
+                teacherNotes: form.teacherNotes || undefined,
             });
             setForm(emptyForm);
             setContacts([emptyContact()]);
