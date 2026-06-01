@@ -12,7 +12,7 @@ import DataTable from "@/components/dataTable/DataTable";
 import Tag from "@/components/ui/Tag/Tag";
 import LoadMore from "@/components/ui/LoadMore/LoadMore";
 import EntrepriseSheet from "@/components/sheets/EntrepriseSheet";
-import CreateEntrepriseModal from "./CreateEntrepriseModal";
+import CreateEntrepriseModal from "./CreateCompanyModal";
 import GestionSecteursModal from "./GestionSecteursModal";
 import DeleteConfirm from "@/components/ui/DeleteConfirm/DeleteConfirm";
 import FilterModal from "./FilterModal";

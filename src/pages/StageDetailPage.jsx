@@ -227,7 +227,7 @@ export default function StageDetailPage() {
                 <ArrowBackIcon /> Retour
             </button>
 
-            {/* ─── Header ─────────────────────────────────────────────────────── */}
+            {/* Header */}
             <div className={styles.header}>
                 <div className={styles.headerLeft}>
                     <h2 className={styles.title}>
@@ -242,7 +242,7 @@ export default function StageDetailPage() {
                 <Tag status={stage.status} />
             </div>
 
-            {/* ─── Info grid ──────────────────────────────────────────────────── */}
+            {/* Info grid */}
             <dl className={styles.infoGrid}>
                 {[
                     ["Entreprise", company, company === nd],
@@ -259,7 +259,7 @@ export default function StageDetailPage() {
                 ))}
             </dl>
 
-            {/* ─── Rejection banners ──────────────────────────────────────────── */}
+            {/* Rejection banners */}
             {stage.status === "rejected" && stage.evaluation?.comment && (
                 <div className={styles.rejectionBanner}>
                     <CloseIcon /> <strong>Motif de rejet :</strong>{" "}
@@ -273,7 +273,7 @@ export default function StageDetailPage() {
                 </div>
             )}
 
-            {/* ─── Task 1: Sheet ──────────────────────────────────────────────── */}
+            {/* Task 1: Sheet ──────────────────────────────────────────────── */}
             <div className={styles.taskCard}>
                 <div className={styles.taskHeader}>
                     <span className={styles.taskNumber}>1</span>

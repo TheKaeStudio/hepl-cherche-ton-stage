@@ -13,7 +13,7 @@ import Recherche from "../pages/Recherche";
 import Stages from "../pages/Stages";
 import Etudiants from "../pages/Etudiants";
 import Entreprises from "../pages/Entreprises";
-import EditEntreprisePage from "../pages/EditEntreprisePage";
+import EditEntreprisePage from "../pages/EditCompanyPage";
 import StageDetailPage from "../pages/StageDetailPage";
 import Utilisateurs from "../pages/Utilisateurs";
 import Inbox from "../pages/Inbox";

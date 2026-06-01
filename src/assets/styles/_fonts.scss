@@ -1,4 +1,4 @@
-// ─── Font stacks ─────────────────────────────────────────────────────────────
+// Font stacks
 :root {
     --sans:
         "Manrope Variable", "Manrope", system-ui, "Segoe UI", Roboto, sans-serif;
@@ -19,13 +19,13 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
-// ─── Headings ─────────────────────────────────────────────────────────────────
+// Headings
 h1, h2, h3, h4, h5, h6 {
     font-family: var(--sans);
     color: var(--text-h);
 }
 
-// ─── Inline elements ─────────────────────────────────────────────────────────
+// Inline elements
 p {
     font-size: 16px;
     font-weight: 500;
@@ -37,7 +37,7 @@ a {
     text-decoration: none;
 }
 
-// ─── Form elements inherit font ───────────────────────────────────────────────
+// Form elements
 input,
 textarea,
 select,
